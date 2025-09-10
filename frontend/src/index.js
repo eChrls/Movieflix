@@ -28,7 +28,8 @@ root.render(
 // Inicializar medición de performance
 measurePerformance();
 
-// Service Worker registration para PWA (opcional)
+// Service Worker registration para PWA (DESHABILITADO - sw.js no existe)
+/*
 if ("serviceWorker" in navigator && process.env.NODE_ENV === "production") {
   window.addEventListener("load", () => {
     navigator.serviceWorker
@@ -41,3 +42,4 @@ if ("serviceWorker" in navigator && process.env.NODE_ENV === "production") {
       });
   });
 }
+*/

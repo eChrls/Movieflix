@@ -102,6 +102,34 @@ const MovieManager = () => {
     }
   };
 
+  // Genre parsing helper - handles both JSON and string formats safely
+  const parseGenres = (genresData) => {
+    if (!genresData) return [];
+    
+    try {
+      // If it's already an array, return it
+      if (Array.isArray(genresData)) return genresData;
+      
+      // If it's a string, try to parse as JSON first
+      if (typeof genresData === 'string') {
+        // Check if it looks like JSON (starts with [ or ")
+        if (genresData.startsWith('[') || genresData.startsWith('"')) {
+          return JSON.parse(genresData);
+        }
+        // Otherwise, treat as comma-separated string
+        return genresData.split(',').map(g => g.trim()).filter(g => g);
+      }
+      
+      return [];
+    } catch (error) {
+      console.warn('Error parsing genres:', genresData, error);
+      // Fallback: treat as comma-separated string
+      return typeof genresData === 'string' 
+        ? genresData.split(',').map(g => g.trim()).filter(g => g)
+        : [];
+    }
+  };
+
   // Load initial data
   useEffect(() => {
     const initializeApp = async () => {
@@ -381,7 +409,7 @@ const MovieManager = () => {
     if (filters.platform && item.platform_id !== filters.platform) return false;
     if (
       filters.genre &&
-      !JSON.parse(item.genres || "[]").includes(filters.genre)
+      !parseGenres(item.genres || "[]").includes(filters.genre)
     )
       return false;
     return true;
@@ -481,7 +509,7 @@ const MovieManager = () => {
                 type: item.type,
                 rating: item.rating,
                 runtime: item.runtime,
-                genres: JSON.parse(item.genres || "[]"),
+                genres: parseGenres(item.genres || "[]"),
                 overview: item.overview,
                 poster_path: item.poster_path,
                 backdrop_path: item.backdrop_path,
@@ -591,24 +619,24 @@ const MovieManager = () => {
           </div>
         )}
 
-        {item.genres && JSON.parse(item.genres).length > 0 && (
+                {item.genres && parseGenres(item.genres).length > 0 && (
           <div className="flex flex-wrap gap-1 mt-2">
-            {JSON.parse(item.genres)
+            {parseGenres(item.genres)
               .slice(0, 3)
               .map((genre) => {
                 const genreObj = genres.find((g) => g.name === genre);
                 return (
                   <span
                     key={genre}
-                    className="bg-gray-800 text-gray-300 px-2 py-1 rounded text-xs border border-gray-700"
+                    className="bg-gray-800 text-gray-400 px-2 py-1 rounded text-xs border border-gray-700"
                   >
                     {genreObj?.icon} {genre}
                   </span>
                 );
               })}
-            {JSON.parse(item.genres).length > 3 && (
+            {parseGenres(item.genres).length > 3 && (
               <span className="bg-gray-800 text-gray-500 px-2 py-1 rounded text-xs border border-gray-700">
-                +{JSON.parse(item.genres).length - 3}
+                +{parseGenres(item.genres).length - 3}
               </span>
             )}
           </div>
