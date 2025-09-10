@@ -18,9 +18,9 @@ async function analyzeIncompleteContent() {
 
     // Buscar contenido que necesita actualización
     const [incompleteContent] = await connection.execute(`
-      SELECT 
-        id, 
-        title, 
+      SELECT
+        id,
+        title,
         title_en,
         year,
         type,
@@ -32,8 +32,8 @@ async function analyzeIncompleteContent() {
         imdb_id,
         tmdb_id,
         platform_id
-      FROM content 
-      WHERE 
+      FROM content
+      WHERE
         (poster_path IS NULL OR poster_path = '') OR
         (overview IS NULL OR overview = '') OR
         (rating IS NULL OR rating = 0) OR
@@ -43,7 +43,9 @@ async function analyzeIncompleteContent() {
       ORDER BY title ASC
     `);
 
-    console.log(`📊 Total de contenido que necesita actualización: ${incompleteContent.length}\n`);
+    console.log(
+      `📊 Total de contenido que necesita actualización: ${incompleteContent.length}\n`
+    );
 
     if (incompleteContent.length === 0) {
       console.log("🎉 ¡Todo el contenido ya está completo!");
@@ -57,16 +59,19 @@ async function analyzeIncompleteContent() {
       rating: [],
       runtime: [],
       imdb_id: [],
-      tmdb_id: []
+      tmdb_id: [],
     };
 
-    incompleteContent.forEach(item => {
+    incompleteContent.forEach((item) => {
       if (!item.poster_path) missingData.poster.push(item.title);
       if (!item.overview) missingData.overview.push(item.title);
-      if (!item.rating || item.rating === 0) missingData.rating.push(item.title);
-      if (!item.runtime || item.runtime === 0) missingData.runtime.push(item.title);
+      if (!item.rating || item.rating === 0)
+        missingData.rating.push(item.title);
+      if (!item.runtime || item.runtime === 0)
+        missingData.runtime.push(item.title);
       if (!item.imdb_id) missingData.imdb_id.push(item.title);
-      if (!item.tmdb_id || item.tmdb_id === 0) missingData.tmdb_id.push(item.title);
+      if (!item.tmdb_id || item.tmdb_id === 0)
+        missingData.tmdb_id.push(item.title);
     });
 
     console.log("📋 Análisis detallado:");
@@ -88,11 +93,16 @@ async function analyzeIncompleteContent() {
       if (!item.imdb_id) missing.push("IMDB ID");
       if (!item.tmdb_id || item.tmdb_id === 0) missing.push("TMDb ID");
 
-      console.log(`${index + 1}. ${item.title} (${item.year}) - Falta: ${missing.join(", ")}`);
+      console.log(
+        `${index + 1}. ${item.title} (${item.year}) - Falta: ${missing.join(
+          ", "
+        )}`
+      );
     });
 
-    console.log("\n🔧 Próximo paso: Ejecutar script de actualización automática");
-
+    console.log(
+      "\n🔧 Próximo paso: Ejecutar script de actualización automática"
+    );
   } catch (error) {
     console.error("❌ Error:", error.message);
   } finally {
