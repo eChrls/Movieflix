@@ -1,0 +1,231 @@
+# MovieFlix - .gitignore
+# Archivo de exclusiones para seguridad y limpieza del repositorio
+
+# =====================================
+# ARCHIVOS CRÍTICOS Y CONFIDENCIALES
+# =====================================
+
+# Documentación con credenciales
+docs/checkpoints.md
+docs/credentials.md
+docs/private/
+
+# Variables de entorno con credenciales
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+backend/.env*
+frontend/.env*
+
+# Archivos de configuración local
+config/local.json
+config/production.json
+
+# =====================================
+# DEPENDENCIAS Y BUILD
+# =====================================
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.yarn-integrity
+
+# Backend
+backend/node_modules/
+backend/npm-debug.log*
+backend/.npm/
+
+# Frontend
+frontend/node_modules/
+frontend/build/
+frontend/dist/
+frontend/npm-debug.log*
+frontend/.npm/
+
+# =====================================
+# LOGS Y TEMPORALES
+# =====================================
+
+# Logs
+logs/
+*.log
+backend/logs/
+frontend/logs/
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# =====================================
+# BASE DE DATOS Y BACKUPS
+# =====================================
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+database/
+backups/
+*.sql.backup
+dump.sql
+
+# =====================================
+# SISTEMA OPERATIVO
+# =====================================
+
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.nfs*
+
+# =====================================
+# EDITORES E IDEs
+# =====================================
+
+# Visual Studio Code
+.vscode/settings.json
+.vscode/launch.json
+.vscode/extensions.json
+.vscode/.ropeproject
+
+# JetBrains IDEs
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+
+# =====================================
+# DESARROLLO Y TESTING
+# =====================================
+
+# Testing
+coverage/
+.nyc_output/
+test-results/
+.coverage
+
+# Temporary folders
+tmp/
+temp/
+.tmp/
+
+# Cache
+.cache/
+.parcel-cache/
+.eslintcache
+
+# =====================================
+# PRODUCCIÓN Y DEPLOY
+# =====================================
+
+# SSL certificates
+*.crt
+*.key
+*.pem
+certs/
+
+# Docker
+.docker/
+Dockerfile.local
+
+# PM2
+ecosystem.config.js
+
+# =====================================
+# ARCHIVOS ESPECÍFICOS DEL PROYECTO
+# =====================================
+
+# Scripts de deploy con credenciales
+scripts/deploy-prod.sh
+scripts/backup-with-credentials.sh
+
+# Configuraciones locales del servidor
+nginx.local.conf
+ssl.local.conf
+
+# Archives y comprimidos temporales
+*.zip
+*.tar.gz
+*.rar
+
+# =====================================
+# DIVERSOS
+# =====================================
+
+# Optional npm cache directory
+.npm
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variables file
+.env
+
+# parcel-bundler cache (https://parceljs.org/)
+.cache
+.parcel-cache
+
+# next.js build output
+.next
+
+# nuxt.js build output
+.nuxt
+
+# vuepress build output
+.vuepress/dist
+
+# Serverless directories
+.serverless
+
+# FuseBox cache
+.fusebox/
+
+# DynamoDB Local files
+.dynamodb/

@@ -1,0 +1,75 @@
+{
+  "name": "movieflix",
+  "version": "1.0.0",
+  "description": "Una aplicación web moderna para gestionar tu colección personal de películas y series",
+  "main": "backend/server.js",
+  "private": true,
+  "author": "MovieFlix Team",
+  "license": "PRIVATE",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/eChrls/MovieFlix.git"
+  },
+  "bugs": {
+    "url": "https://github.com/eChrls/MovieFlix/issues"
+  },
+  "homepage": "https://casa74b.duckdns.org",
+  "keywords": [
+    "movies",
+    "series",
+    "netflix",
+    "entertainment",
+    "collection",
+    "react",
+    "nodejs",
+    "mysql"
+  ],
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "scripts": {
+    "install:all": "npm run install:backend && npm run install:frontend",
+    "install:backend": "cd backend && npm install",
+    "install:frontend": "cd frontend && npm install",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm start",
+    "build": "npm run build:frontend",
+    "build:frontend": "cd frontend && npm run build",
+    "start": "npm run start:backend",
+    "start:backend": "cd backend && npm start",
+    "start:production": "pm2 start ecosystem.config.js",
+    "stop:production": "pm2 stop movieflix",
+    "restart:production": "pm2 restart movieflix",
+    "logs": "pm2 logs movieflix",
+    "test": "npm run test:backend && npm run test:frontend",
+    "test:backend": "cd backend && npm test",
+    "test:frontend": "cd frontend && npm test",
+    "lint": "npm run lint:backend && npm run lint:frontend",
+    "lint:backend": "cd backend && npm run lint",
+    "lint:frontend": "cd frontend && npm run lint",
+    "clean": "npm run clean:backend && npm run clean:frontend",
+    "clean:backend": "cd backend && rm -rf node_modules package-lock.json",
+    "clean:frontend": "cd frontend && rm -rf node_modules build package-lock.json",
+    "setup:db": "cd backend && node scripts/init-db.js",
+    "seed:db": "cd backend && node scripts/seed-data.js",
+    "backup:db": "cd backend && node scripts/backup-db.js",
+    "deploy:local": "chmod +x scripts/deploy.sh && sudo ./scripts/deploy.sh",
+    "health:check": "curl -f http://localhost:3001/api/health || echo 'API not responding'",
+    "precommit": "npm run lint && npm run test",
+    "postinstall": "echo 'Instalación completada. Ejecuta npm run dev para desarrollo o npm run deploy:local para producción'"
+  },
+  "devDependencies": {
+    "concurrently": "^7.6.0"
+  },
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "config": {
+    "domain": "home-movieflix.duckdns.org",
+    "backend_port": 3001,
+    "frontend_port": 3000
+  }
+}

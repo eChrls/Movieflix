@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#E50914" />
+    <meta
+      name="description"
+      content="MovieFlix - Tu gestor personal de películas y series. Organiza, califica y descubre nuevo contenido con un diseño profesional estilo Netflix."
+    />
+    <meta
+      name="keywords"
+      content="películas, series, gestor, streaming, netflix, hbo, disney, calificaciones, imdb"
+    />
+    <meta name="author" content="MovieFlix" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="%PUBLIC_URL%" />
+    <meta
+      property="og:title"
+      content="MovieFlix - Gestor Personal de Películas y Series"
+    />
+    <meta
+      property="og:description"
+      content="Organiza tu contenido audiovisual favorito con un diseño profesional estilo Netflix"
+    />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta
+      property="twitter:title"
+      content="MovieFlix - Gestor Personal de Películas y Series"
+    />
+    <meta
+      property="twitter:description"
+      content="Organiza tu contenido audiovisual favorito con un diseño profesional estilo Netflix"
+    />
+
+    <title>MovieFlix - Tu gestor personal</title>
+
+    <!-- Tailwind CSS CDN para desarrollo -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              netflix: "#E50914",
+              "netflix-dark": "#B81D24",
+              "netflix-light": "#F40612",
+              "gray-950": "#0a0a0a",
+              hbo: "#9B59B6",
+              prime: "#00A8E1",
+              apple: "#000000",
+              disney: "#113CCF",
+              paramount: "#0064FF",
+              movistar: "#00B7ED",
+              filmin: "#FF6B35",
+              criterion: "#FFD700",
+              shudder: "#FF4500",
+              apk: "#34C759",
+            },
+            fontFamily: {
+              netflix: [
+                "Netflix Sans",
+                "-apple-system",
+                "BlinkMacSystemFont",
+                "Segoe UI",
+                "Roboto",
+                "sans-serif",
+              ],
+            },
+            animation: {
+              "fade-in": "fadeIn 0.5s ease-in-out",
+              "slide-up": "slideUp 0.3s ease-out",
+              "pulse-slow": "pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+            },
+            keyframes: {
+              fadeIn: {
+                "0%": { opacity: "0" },
+                "100%": { opacity: "1" },
+              },
+              slideUp: {
+                "0%": { transform: "translateY(20px)", opacity: "0" },
+                "100%": { transform: "translateY(0)", opacity: "1" },
+              },
+            },
+          },
+        },
+      };
+    </script>
+
+    <!-- Preload critical fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!-- Performance optimization -->
+    <link rel="dns-prefetch" href="//api.themoviedb.org" />
+    <link rel="dns-prefetch" href="//www.omdbapi.com" />
+  </head>
+  <body class="bg-black text-white antialiased">
+    <noscript>
+      <div
+        style="
+          color: white;
+          background: #e50914;
+          padding: 20px;
+          text-align: center;
+        "
+      >
+        Necesitas habilitar JavaScript para usar MovieFlix.
+      </div>
+    </noscript>
+    <div id="root"></div>
+
+    <!-- Loading fallback -->
+    <script>
+      if (!window.React) {
+        document.getElementById("root").innerHTML = `
+          <div style="height: 100vh; display: flex; align-items: center; justify-content: center; background: black; color: white;">
+            <div style="text-align: center;">
+              <div style="animation: spin 1s linear infinite; width: 40px; height: 40px; border: 3px solid #333; border-top: 3px solid #E50914; border-radius: 50%; margin: 0 auto 20px;"></div>
+              <h1 style="color: #E50914; font-size: 24px; margin-bottom: 10px;">MovieFlix</h1>
+              <p>Cargando tu gestor personal...</p>
+            </div>
+          </div>
+          <style>
+            @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+          </style>
+        `;
+      }
+    </script>
+  </body>
+</html>
