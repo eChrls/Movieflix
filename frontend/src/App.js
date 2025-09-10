@@ -105,27 +105,33 @@ const MovieManager = () => {
   // Genre parsing helper - handles both JSON and string formats safely
   const parseGenres = (genresData) => {
     if (!genresData) return [];
-    
+
     try {
       // If it's already an array, return it
       if (Array.isArray(genresData)) return genresData;
-      
+
       // If it's a string, try to parse as JSON first
-      if (typeof genresData === 'string') {
+      if (typeof genresData === "string") {
         // Check if it looks like JSON (starts with [ or ")
-        if (genresData.startsWith('[') || genresData.startsWith('"')) {
+        if (genresData.startsWith("[") || genresData.startsWith('"')) {
           return JSON.parse(genresData);
         }
         // Otherwise, treat as comma-separated string
-        return genresData.split(',').map(g => g.trim()).filter(g => g);
+        return genresData
+          .split(",")
+          .map((g) => g.trim())
+          .filter((g) => g);
       }
-      
+
       return [];
     } catch (error) {
-      console.warn('Error parsing genres:', genresData, error);
+      console.warn("Error parsing genres:", genresData, error);
       // Fallback: treat as comma-separated string
-      return typeof genresData === 'string' 
-        ? genresData.split(',').map(g => g.trim()).filter(g => g)
+      return typeof genresData === "string"
+        ? genresData
+            .split(",")
+            .map((g) => g.trim())
+            .filter((g) => g)
         : [];
     }
   };
@@ -406,7 +412,8 @@ const MovieManager = () => {
       return false;
     }
     if (filters.type && item.type !== filters.type) return false;
-    if (filters.platform && item.platform_id !== filters.platform) return false;
+    if (filters.platform && item.platform_id !== parseInt(filters.platform))
+      return false;
     if (
       filters.genre &&
       !parseGenres(item.genres || "[]").includes(filters.genre)
@@ -423,7 +430,7 @@ const MovieManager = () => {
       "Prime Video": "#00A8E1",
       "Apple TV+": "#000000",
       "Disney+": "#113CCF",
-      "Paramount+": "#0064FF",
+      SkyShowtime: "#0064FF",
       "Movistar+": "#00B7ED",
       Filmin: "#10B981", // 🟢 VERDE - Como solicitado
       APK: "#FF8500", // 🟠 NARANJA - Como solicitado
@@ -619,7 +626,7 @@ const MovieManager = () => {
           </div>
         )}
 
-                {item.genres && parseGenres(item.genres).length > 0 && (
+        {item.genres && parseGenres(item.genres).length > 0 && (
           <div className="flex flex-wrap gap-1 mt-2">
             {parseGenres(item.genres)
               .slice(0, 3)

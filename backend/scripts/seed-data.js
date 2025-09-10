@@ -281,7 +281,7 @@ async function seedData() {
         type: "series",
         rating: 8.7,
         genres: ["Drama", "Western"],
-        platform: "Paramount+",
+        platform: "SkyShowtime",
       },
       {
         title: "1883",
@@ -289,7 +289,7 @@ async function seedData() {
         type: "series",
         rating: 8.0,
         genres: ["Drama", "Western"],
-        platform: "Paramount+",
+        platform: "SkyShowtime",
       },
 
       // Películas - Westerns
@@ -307,7 +307,7 @@ async function seedData() {
         type: "movie",
         rating: 8.0,
         genres: ["Western"],
-        platform: "Paramount+",
+        platform: "SkyShowtime",
       },
       {
         title: "Centauros del Desierto",

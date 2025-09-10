@@ -188,10 +188,10 @@ async function initDatabase() {
         url: "https://disneyplus.com",
       },
       {
-        name: "Paramount+",
-        icon: "⛰️",
+        name: "SkyShowtime",
+        icon: "🌌",
         color: "#0064FF",
-        url: "https://paramountplus.com",
+        url: "https://skyshowtime.com",
       },
       {
         name: "Movistar+",
