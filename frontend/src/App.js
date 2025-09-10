@@ -405,6 +405,18 @@ const MovieManager = () => {
   const filteredContent = (
     activeTab === "pending" ? content : watchedContent
   ).filter((item) => {
+    // Debug logging
+    if (filters.platform) {
+      console.log(
+        "Filtering by platform:",
+        filters.platform,
+        "Item platform_id:",
+        item.platform_id,
+        "Parsed:",
+        parseInt(filters.platform)
+      );
+    }
+
     if (
       filters.search &&
       !item.title.toLowerCase().includes(filters.search.toLowerCase())
