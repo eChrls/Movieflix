@@ -62,8 +62,11 @@
             colors: {
               netflix: "#E50914",
               "netflix-dark": "#B81D24",
+              "netflix-darker": "#8B0000", // Rojo más oscuro para cartas
               "netflix-light": "#F40612",
               "gray-950": "#0a0a0a",
+              "gray-carbon": "#1a1a1a", // Gris carbón para fondo
+              "gray-card": "#2a2a2a", // Gris para cartas
               hbo: "#9B59B6",
               prime: "#00A8E1",
               apple: "#000000",
@@ -84,6 +87,8 @@
                 "Roboto",
                 "sans-serif",
               ],
+              'maven': ['Maven Pro', 'sans-serif'],
+              'tech': ['Share Tech Mono', 'monospace'],
             },
             animation: {
               "fade-in": "fadeIn 0.5s ease-in-out",
@@ -108,12 +113,15 @@
     <!-- Preload critical fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    
+    <!-- Google Fonts - Maven Pro & Share Tech -->
+    <link href="https://fonts.googleapis.com/css2?family=Maven+Pro:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet" />
 
     <!-- Performance optimization -->
     <link rel="dns-prefetch" href="//api.themoviedb.org" />
     <link rel="dns-prefetch" href="//www.omdbapi.com" />
   </head>
-  <body class="bg-black text-white antialiased">
+  <body class="bg-gray-carbon text-white antialiased font-maven">
     <noscript>
       <div
         style="

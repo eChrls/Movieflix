@@ -41,6 +41,9 @@ const MovieManager = () => {
   const [searchLoading, setSearchLoading] = useState(false);
   const [showPlatformMenu, setShowPlatformMenu] = useState(null); // Para el menú de plataformas
   const [showScrollTop, setShowScrollTop] = useState(false); // Para el botón volver arriba
+  const [topActiveTab, setTopActiveTab] = useState("movies"); // Para las pestañas del Top 3
+  const [searchSuggestions, setSearchSuggestions] = useState([]); // Para sugerencias de búsqueda
+  const [showSuggestions, setShowSuggestions] = useState(false); // Mostrar dropdown de sugerencias
 
   const [newContent, setNewContent] = useState({
     title: "",
@@ -296,6 +299,65 @@ const MovieManager = () => {
     }
   };
 
+  // Función para obtener sugerencias de búsqueda
+  const getSearchSuggestions = async (query) => {
+    if (!query || query.length < 2) {
+      setSearchSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    try {
+      const data = await apiCall(
+        `/search/suggestions?query=${encodeURIComponent(query)}`
+      );
+      
+      if (data && data.results) {
+        setSearchSuggestions(data.results.slice(0, 5)); // Limitar a 5 sugerencias
+        setShowSuggestions(true);
+      }
+    } catch (error) {
+      console.error("Error getting suggestions:", error);
+      setSearchSuggestions([]);
+      setShowSuggestions(false);
+    }
+  };
+
+  // Función para seleccionar una sugerencia y completar el formulario
+  const selectSuggestion = async (suggestion) => {
+    setNewContent({
+      ...newContent,
+      title: suggestion.title || suggestion.name,
+      title_en: suggestion.original_title || suggestion.original_name,
+      year: suggestion.release_date ? suggestion.release_date.split('-')[0] : suggestion.first_air_date ? suggestion.first_air_date.split('-')[0] : '',
+      type: suggestion.media_type === 'tv' ? 'series' : 'movie',
+      tmdb_id: suggestion.id,
+      poster_path: suggestion.poster_path ? `https://image.tmdb.org/t/p/w500${suggestion.poster_path}` : '',
+      backdrop_path: suggestion.backdrop_path ? `https://image.tmdb.org/t/p/w1280${suggestion.backdrop_path}` : '',
+      overview: suggestion.overview,
+    });
+
+    // Buscar datos adicionales (rating, duración, etc.)
+    const enhancedData = await searchEnhancedAPI(
+      suggestion.title || suggestion.name,
+      suggestion.release_date ? suggestion.release_date.split('-')[0] : suggestion.first_air_date ? suggestion.first_air_date.split('-')[0] : '',
+      suggestion.media_type === 'tv' ? 'series' : 'movie'
+    );
+
+    if (enhancedData) {
+      setNewContent(prev => ({
+        ...prev,
+        rating: enhancedData.rating || prev.rating,
+        runtime: enhancedData.runtime || prev.runtime,
+        genres: enhancedData.genres || prev.genres,
+        imdb_id: enhancedData.imdb_id || prev.imdb_id,
+      }));
+    }
+
+    setShowSuggestions(false);
+    setSearchSuggestions([]);
+  };
+
   // Función para cambiar plataforma
   const changePlatform = async (contentId, newPlatformId) => {
     try {
@@ -489,7 +551,7 @@ const MovieManager = () => {
   );
 
   const ContentCard = ({ item, isWatched = false }) => (
-    <div className="bg-gray-900 rounded-lg border border-gray-800 overflow-hidden hover:border-gray-700 hover:shadow-lg transition-all duration-300 group">
+    <div className="bg-gray-card rounded-lg border border-gray-700 overflow-hidden hover:border-netflix-dark hover:shadow-lg transition-all duration-300 group font-maven">
       {/* Poster Section - Más rectangular y alargado */}
       <div className="relative">
         {item.poster_path ? (
@@ -519,7 +581,7 @@ const MovieManager = () => {
 
         {/* Rating badge overlay */}
         {item.rating && (
-          <div className="absolute top-2 right-2 bg-yellow-600 text-yellow-100 px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1">
+          <div className="absolute top-2 right-2 bg-yellow-600 text-yellow-100 px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1 font-tech">
             <Star size={12} fill="currentColor" />
             {item.rating}
           </div>
@@ -565,7 +627,7 @@ const MovieManager = () => {
           </button>
           <button
             onClick={() => deleteContent(item.id)}
-            className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg transition-colors"
+            className="bg-netflix-darker hover:bg-netflix text-white p-2 rounded-lg transition-colors"
             title="Eliminar"
             aria-label="Eliminar"
           >
@@ -578,34 +640,34 @@ const MovieManager = () => {
         <div className="flex justify-between items-start mb-2">
           <div className="flex-1 min-w-0">
             <h3
-              className="text-white font-semibold text-sm sm:text-base mb-1 truncate"
+              className="text-white font-semibold text-sm sm:text-base mb-1 truncate font-maven"
               title={item.title}
             >
               {item.title}
             </h3>
             {item.title_en && item.title_en !== item.title && (
               <p
-                className="text-gray-400 text-xs mb-1 truncate"
+                className="text-gray-400 text-xs mb-1 truncate font-maven"
                 title={item.title_en}
               >
                 {item.title_en}
               </p>
             )}
-            <div className="flex items-center gap-1 mb-1 flex-wrap">
-              <span className="text-gray-400 text-xs">{item.year}</span>
+            <div className="flex items-center gap-2 mb-1 flex-wrap">
+              <span className="text-gray-400 text-xs font-tech">{item.year}</span>
               {item.runtime && (
-                <span className="text-gray-400 text-xs">
+                <span className="text-gray-400 text-xs font-tech">
                   {item.runtime} min
                 </span>
               )}
               {/* Temporadas y episodios para series */}
               {item.type === "series" && item.seasons && (
-                <span className="text-gray-400 text-xs">
+                <span className="text-gray-400 text-xs font-tech">
                   {item.seasons} temp.
                 </span>
               )}
               {item.type === "series" && item.episodes && (
-                <span className="text-gray-400 text-xs">
+                <span className="text-gray-400 text-xs font-tech">
                   {item.episodes} ep.
                 </span>
               )}
@@ -619,7 +681,7 @@ const MovieManager = () => {
                   title="Ver en IMDb"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <span className="text-xs">IMDb</span>
+                  <span className="text-xs font-tech">IMDb</span>
                 </a>
               )}
             </div>
@@ -695,23 +757,23 @@ const MovieManager = () => {
   );
 
   const TopCard = ({ item, rank }) => (
-    <div className="relative bg-gradient-to-br from-red-900 to-gray-900 rounded-lg p-3 border border-red-800 hover:border-red-600 transition-all duration-300 group">
-      <div className="absolute -top-2 -left-2 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-full w-6 h-6 flex items-center justify-center font-bold text-xs shadow-lg">
+    <div className="relative bg-gradient-to-br from-netflix-darker to-gray-card rounded-lg p-2 border border-netflix-dark hover:border-netflix transition-all duration-300 group font-maven">
+      <div className="absolute -top-2 -left-2 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-full w-5 h-5 flex items-center justify-center font-bold text-xs shadow-lg font-tech">
         {rank}
       </div>
-      <h3 className="text-white font-bold text-xs sm:text-sm mb-1 pr-4">
+      <h3 className="text-white font-semibold text-xs sm:text-sm mb-1 pr-4 font-maven">
         {item.title}
       </h3>
       <div className="flex items-center gap-1 text-xs mb-1">
-        <span className="bg-yellow-600 text-yellow-100 px-1 py-0.5 rounded text-xs font-bold flex items-center gap-1">
+        <span className="bg-yellow-600 text-yellow-100 px-1 py-0.5 rounded text-xs font-medium flex items-center gap-1 font-tech">
           <Star size={8} fill="currentColor" />
           {item.rating}
         </span>
-        <span className="text-gray-300">{item.year}</span>
+        <span className="text-gray-300 font-maven">{item.year}</span>
         <span>{item.type === "series" ? "📺" : "🎬"}</span>
       </div>
       {/* Duración y temporadas/episodios */}
-      <div className="flex items-center gap-1 text-xs text-gray-400">
+      <div className="flex items-center gap-2 text-xs text-gray-400 font-maven">
         {item.runtime && <span>{item.runtime} min</span>}
         {item.type === "series" && item.seasons && (
           <span>{item.seasons} temp.</span>
@@ -748,7 +810,7 @@ const MovieManager = () => {
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-red-600 mx-auto mb-4"></div>
-          <h1 className="text-2xl font-bold text-red-600 mb-2">MovieFlix</h1>
+          <h1 className="text-2xl font-bold text-netflix mb-2 font-maven">MovieFlix</h1>
           <p className="text-white">Cargando tu gestor personal...</p>
         </div>
       </div>
@@ -756,13 +818,13 @@ const MovieManager = () => {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-gray-carbon text-white font-maven">
       {/* Header */}
-      <header className="bg-gray-950 border-b border-gray-800 sticky top-0 z-40 backdrop-blur-sm">
+      <header className="bg-gray-950 border-b border-gray-700 sticky top-0 z-40 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex flex-col lg:flex-row justify-between items-center gap-4">
             <div className="flex items-center gap-4">
-              <h1 className="text-3xl font-bold text-red-600 flex items-center gap-2">
+              <h1 className="text-3xl font-bold text-netflix flex items-center gap-2 font-maven">
                 🎬 MovieFlix
               </h1>
               <div className="flex items-center gap-2">
@@ -773,7 +835,7 @@ const MovieManager = () => {
                       profiles.find((p) => p.id === parseInt(e.target.value))
                     )
                   }
-                  className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-red-600 transition-colors"
+                  className="bg-gray-card border border-gray-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-netflix transition-colors font-maven"
                 >
                   {profiles.map((profile) => (
                     <option key={profile.id} value={profile.id}>
@@ -783,7 +845,7 @@ const MovieManager = () => {
                 </select>
                 <button
                   onClick={() => setShowProfileModal(true)}
-                  className="bg-red-600 hover:bg-red-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+                  className="bg-netflix hover:bg-netflix-dark px-3 py-2 rounded-lg text-sm font-medium transition-colors font-maven"
                 >
                   + Perfil
                 </button>
@@ -830,41 +892,53 @@ const MovieManager = () => {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-6">
-        {/* Top Content */}
+        {/* Top Content - Rediseñado más compacto */}
         {activeTab === "pending" &&
           (topContent.movies.length > 0 || topContent.series.length > 0) && (
-            <section className="mb-8">
-              <h2 className="text-2xl font-bold mb-6 text-red-600 flex items-center gap-2">
-                🏆 Top 3 Recomendados
+            <section className="mb-6">
+              <h2 className="text-xl font-bold mb-4 text-netflix flex items-center gap-2 font-maven">
+                🏆 Top 3
               </h2>
-              <div className="grid md:grid-cols-2 gap-6">
-                {topContent.movies.length > 0 && (
-                  <div>
-                    <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                      🎬 Películas
-                    </h3>
-                    <div className="grid gap-3">
-                      {topContent.movies.map((movie, index) => (
-                        <TopCard key={movie.id} item={movie} rank={index + 1} />
-                      ))}
-                    </div>
-                  </div>
+              
+              {/* Pestañas */}
+              <div className="flex mb-4 bg-gray-card rounded-lg p-1 w-fit">
+                <button
+                  onClick={() => setTopActiveTab("movies")}
+                  className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 font-maven ${
+                    topActiveTab === "movies"
+                      ? "bg-netflix text-white shadow-md"
+                      : "text-gray-300 hover:text-white hover:bg-gray-700"
+                  }`}
+                >
+                  🎬 Películas
+                </button>
+                <button
+                  onClick={() => setTopActiveTab("series")}
+                  className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 font-maven ${
+                    topActiveTab === "series"
+                      ? "bg-netflix text-white shadow-md"
+                      : "text-gray-300 hover:text-white hover:bg-gray-700"
+                  }`}
+                >
+                  📺 Series
+                </button>
+              </div>
+
+              {/* Contenido de las pestañas */}
+              <div className="grid gap-2 max-h-40 overflow-hidden">
+                {topActiveTab === "movies" && topContent.movies.length > 0 && (
+                  <>
+                    {topContent.movies.map((movie, index) => (
+                      <TopCard key={movie.id} item={movie} rank={index + 1} />
+                    ))}
+                  </>
                 )}
-                {topContent.series.length > 0 && (
-                  <div>
-                    <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                      📺 Series
-                    </h3>
-                    <div className="grid gap-3">
-                      {topContent.series.map((series, index) => (
-                        <TopCard
-                          key={series.id}
-                          item={series}
-                          rank={index + 1}
-                        />
-                      ))}
-                    </div>
-                  </div>
+                {topActiveTab === "series" && topContent.series.length > 0 && (
+                  <>
+                    {topContent.series.map((series, index) => (
+                      <TopCard key={series.id} item={series} rank={index + 1} />
+                    ))}
+                  </>
                 )}
               </div>
             </section>
