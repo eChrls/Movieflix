@@ -771,29 +771,27 @@ const MovieManager = () => {
   );
 
   const TopCard = ({ item, rank }) => (
-    <div className="relative bg-gradient-to-br from-netflix-darker to-gray-card rounded-lg p-2 border border-netflix-dark hover:border-netflix transition-all duration-300 group font-maven">
-      <div className="absolute -top-2 -left-2 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-full w-5 h-5 flex items-center justify-center font-bold text-xs shadow-lg font-tech">
+    <div className="relative bg-gradient-to-br from-netflix-darker to-gray-card rounded-md p-1.5 border border-netflix-dark hover:border-netflix transition-all duration-300 group font-maven">
+      <div className="absolute -top-1 -left-1 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-full w-4 h-4 flex items-center justify-center font-bold text-xs shadow-lg font-tech">
         {rank}
       </div>
-      <h3 className="text-white font-semibold text-xs sm:text-sm mb-1 pr-4 font-maven leading-snug break-words">
+      <h3 className="text-white font-medium text-xs mb-1 pr-3 font-maven leading-tight break-words">
         {item.title}
       </h3>
-      <div className="flex items-center gap-1 text-xs mb-1">
-        <span className="bg-yellow-600 text-yellow-100 px-1 py-0.5 rounded text-xs font-medium flex items-center gap-1 font-tech">
-          <Star size={8} fill="currentColor" />
+      <div className="flex items-center gap-1 text-xs mb-0.5">
+        <span className="bg-yellow-600 text-yellow-100 px-1 py-0.5 rounded text-xs font-medium flex items-center gap-0.5 font-tech">
+          <Star size={6} fill="currentColor" />
           {item.rating}
         </span>
-        <span className="text-gray-300 font-maven">{item.year}</span>
-        <span>{item.type === "series" ? "📺" : "🎬"}</span>
+        <span className="text-gray-300 font-maven text-xs">{item.year}</span>
+        <span className="text-xs">{item.type === "series" ? "📺" : "🎬"}</span>
       </div>
       {/* Duración y temporadas/episodios */}
-      <div className="flex items-center gap-2 text-xs text-gray-400 font-maven">
-        {item.runtime && <span>{item.runtime} min</span>}
-        {item.type === "series" && item.seasons && (
-          <span>{item.seasons} temp.</span>
-        )}
+      <div className="flex items-center gap-1.5 text-xs text-gray-400 font-maven">
+        {item.runtime && <span>{item.runtime}min</span>}
+        {item.type === "series" && item.seasons && <span>{item.seasons}T</span>}
         {item.type === "series" && item.episodes && (
-          <span>{item.episodes} ep.</span>
+          <span>{item.episodes}E</span>
         )}
       </div>
     </div>
