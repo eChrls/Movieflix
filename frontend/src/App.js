@@ -570,7 +570,7 @@ const MovieManager = () => {
           <img
             src={item.poster_path}
             alt={item.title}
-            className="w-full h-64 sm:h-72 object-contain bg-gray-800"
+            className="w-full h-48 sm:h-56 object-cover bg-gray-800"
             loading="lazy"
             onError={(e) => {
               // Fallback si la imagen no carga
@@ -582,7 +582,7 @@ const MovieManager = () => {
 
         {/* Fallback cuando no hay poster */}
         <div
-          className={`w-full h-64 sm:h-72 bg-gray-800 flex items-center justify-center ${
+          className={`w-full h-48 sm:h-56 bg-gray-800 flex items-center justify-center ${
             item.poster_path ? "hidden" : "flex"
           }`}
         >
@@ -1031,7 +1031,7 @@ const MovieManager = () => {
 
         {/* Content Grid - Optimizado para móvil con altura uniforme */}
         {filteredContent.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 auto-rows-max">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
             {filteredContent.map((item) => (
               <ContentCard
                 key={item.id}
