@@ -61,7 +61,8 @@
           extend: {
             colors: {
               // Rojos metalizados con brillo real
-              netflix: "linear-gradient(135deg, #CC0C1C 0%, #8B0000 50%, #660000 100%)",
+              netflix:
+                "linear-gradient(135deg, #CC0C1C 0%, #8B0000 50%, #660000 100%)",
               "netflix-metallic": "#8B0000",
               "netflix-dark": "#660000",
               "netflix-darker": "#4A0000", // Rojo metálico más oscuro
@@ -131,8 +132,36 @@
     <link rel="dns-prefetch" href="//api.themoviedb.org" />
     <link rel="dns-prefetch" href="//www.omdbapi.com" />
   </head>
-  <body class="antialiased font-maven" style="background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 25%, #2C2C2C 50%, #1a1a1a 75%, #0a0a0a 100%); background-attachment: fixed; color: white;">
-    <div class="absolute inset-0 opacity-30 pointer-events-none" style="background: radial-gradient(ellipse at top left, rgba(204, 12, 28, 0.1) 0%, transparent 50%), radial-gradient(ellipse at bottom right, rgba(44, 44, 44, 0.2) 0%, transparent 50%);"></div>
+  <body
+    class="antialiased font-maven"
+    style="
+      background: linear-gradient(
+        135deg,
+        #0a0a0a 0%,
+        #1a1a1a 25%,
+        #2c2c2c 50%,
+        #1a1a1a 75%,
+        #0a0a0a 100%
+      );
+      background-attachment: fixed;
+      color: white;
+    "
+  >
+    <div
+      class="absolute inset-0 opacity-30 pointer-events-none"
+      style="
+        background: radial-gradient(
+            ellipse at top left,
+            rgba(204, 12, 28, 0.1) 0%,
+            transparent 50%
+          ),
+          radial-gradient(
+            ellipse at bottom right,
+            rgba(44, 44, 44, 0.2) 0%,
+            transparent 50%
+          );
+      "
+    ></div>
     <noscript>
       <div
         style="

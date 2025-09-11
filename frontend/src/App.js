@@ -355,7 +355,7 @@ const MovieManager = () => {
   // Función para seleccionar una sugerencia y completar el formulario
   const selectSuggestion = async (suggestion) => {
     console.log(`✅ Seleccionando: ${suggestion.display_title}`);
-    
+
     // Cerrar dropdown inmediatamente para mejor UX
     setShowSuggestions(false);
     setSearchSuggestions([]);
@@ -395,7 +395,9 @@ const MovieManager = () => {
           genres: enhancedData.genres || prev.genres,
           imdb_id: enhancedData.imdb_id || prev.imdb_id,
         }));
-        console.log(`🎯 Datos completos cargados para: ${suggestion.display_title}`);
+        console.log(
+          `🎯 Datos completos cargados para: ${suggestion.display_title}`
+        );
       }
     } catch (error) {
       console.error("Error cargando datos adicionales:", error);
@@ -1148,7 +1150,9 @@ const MovieManager = () => {
                         <input
                           type="text"
                           value={newContent.title}
-                          onChange={(e) => handleSearchInputChange(e.target.value)}
+                          onChange={(e) =>
+                            handleSearchInputChange(e.target.value)
+                          }
                           onFocus={() => {
                             if (searchSuggestions.length > 0) {
                               setShowSuggestions(true);
@@ -1158,7 +1162,7 @@ const MovieManager = () => {
                           placeholder="Escribe el título de la película o serie..."
                           required
                         />
-                        
+
                         {/* Dropdown de sugerencias */}
                         {showSuggestions && searchSuggestions.length > 0 && (
                           <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-gray-900 border border-gray-700 rounded-lg shadow-xl max-h-60 overflow-y-auto">
@@ -1177,7 +1181,9 @@ const MovieManager = () => {
                                     />
                                   ) : (
                                     <div className="w-8 h-12 bg-gray-700 rounded flex items-center justify-center">
-                                      {suggestion.media_type === 'tv' ? '📺' : '🎬'}
+                                      {suggestion.media_type === "tv"
+                                        ? "📺"
+                                        : "🎬"}
                                     </div>
                                   )}
                                   <div className="flex-1 min-w-0">
@@ -1185,13 +1191,19 @@ const MovieManager = () => {
                                       {suggestion.display_title}
                                     </div>
                                     <div className="text-sm text-gray-400 mt-1">
-                                      {suggestion.media_type === 'tv' ? 'Serie' : 'Película'}
-                                      {suggestion.year && ` • ${suggestion.year}`}
+                                      {suggestion.media_type === "tv"
+                                        ? "Serie"
+                                        : "Película"}
+                                      {suggestion.year &&
+                                        ` • ${suggestion.year}`}
                                     </div>
                                     {suggestion.overview && (
                                       <div className="text-xs text-gray-500 mt-1 line-clamp-2">
-                                        {suggestion.overview.length > 80 
-                                          ? `${suggestion.overview.substring(0, 80)}...` 
+                                        {suggestion.overview.length > 80
+                                          ? `${suggestion.overview.substring(
+                                              0,
+                                              80
+                                            )}...`
                                           : suggestion.overview}
                                       </div>
                                     )}
