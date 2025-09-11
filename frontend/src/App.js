@@ -941,7 +941,7 @@ const MovieManager = () => {
               </div>
 
               {/* Contenido de las pestañas */}
-              <div className="grid gap-2 max-h-40 overflow-hidden">
+              <div className="grid gap-4">
                 {topActiveTab === "movies" && topContent.movies.length > 0 && (
                   <>
                     {topContent.movies.map((movie, index) => (
