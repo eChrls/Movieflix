@@ -231,6 +231,8 @@ app.post("/api/content", async (req, res) => {
       type,
       rating,
       runtime,
+      seasons,
+      episodes,
       genres,
       overview,
       poster_path,
@@ -250,10 +252,10 @@ app.post("/api/content", async (req, res) => {
     const [result] = await dbPool.execute(
       `
       INSERT INTO content (
-        title, title_en, year, type, rating, runtime, genres, overview,
+        title, title_en, year, type, rating, runtime, seasons, episodes, genres, overview,
         poster_path, backdrop_path, imdb_id, tmdb_id, platform_id, profile_id, status
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')
     `,
       [
         title,
@@ -262,6 +264,8 @@ app.post("/api/content", async (req, res) => {
         type,
         rating || null,
         runtime || null,
+        seasons || null,
+        episodes || null,
         JSON.stringify(genres || []),
         overview || null,
         poster_path || null,
@@ -301,6 +305,8 @@ app.put("/api/content/:id", async (req, res) => {
       type,
       rating,
       runtime,
+      seasons,
+      episodes,
       genres,
       overview,
       poster_path,
@@ -318,7 +324,7 @@ app.put("/api/content/:id", async (req, res) => {
       `
       UPDATE content
       SET title = ?, title_en = ?, year = ?, type = ?, rating = ?, runtime = ?,
-          genres = ?, overview = ?, poster_path = ?, backdrop_path = ?,
+          seasons = ?, episodes = ?, genres = ?, overview = ?, poster_path = ?, backdrop_path = ?,
           imdb_id = ?, tmdb_id = ?, platform_id = ?, updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
     `,
@@ -329,6 +335,8 @@ app.put("/api/content/:id", async (req, res) => {
         type,
         rating || null,
         runtime || null,
+        seasons || null,
+        episodes || null,
         JSON.stringify(genres || []),
         overview || null,
         poster_path || null,

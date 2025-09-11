@@ -65,6 +65,8 @@ class SingleContentUpdater {
           tmdb_id = ?,
           rating = ?,
           genres = ?,
+          seasons = ?,
+          episodes = ?,
           updated_at = CURRENT_TIMESTAMP
         WHERE id = ?
       `,
@@ -80,6 +82,8 @@ class SingleContentUpdater {
           tmdbData.genres.length > 0
             ? JSON.stringify(tmdbData.genres)
             : item.genres,
+          item.type === "series" ? tmdbData.seasons || item.seasons : null,
+          item.type === "series" ? tmdbData.episodes || item.episodes : null,
           contentId,
         ]
       );
@@ -89,6 +93,10 @@ class SingleContentUpdater {
       console.log(`   IMDB ID: ${tmdbData.imdb_id}`);
       console.log(`   Rating: ${omdbData?.imdb_rating || tmdbData.rating}`);
       console.log(`   Póster: ${tmdbData.poster_path ? "Sí" : "No"}`);
+      if (item.type === "series") {
+        console.log(`   Temporadas: ${tmdbData.seasons || "N/A"}`);
+        console.log(`   Episodios: ${tmdbData.episodes || "N/A"}`);
+      }
 
       return true;
     } catch (error) {
@@ -143,6 +151,8 @@ class SingleContentUpdater {
             type === "movie"
               ? details.runtime
               : details.episode_run_time?.[0] || null,
+          seasons: type === "series" ? details.number_of_seasons : null,
+          episodes: type === "series" ? details.number_of_episodes : null,
           imdb_id: details.external_ids?.imdb_id || null,
           rating: details.vote_average || null,
           genres: details.genres ? details.genres.map((g) => g.name) : [],
