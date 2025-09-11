@@ -579,6 +579,17 @@ const MovieManager = () => {
                   {item.runtime} min
                 </span>
               )}
+              {/* Temporadas y episodios para series */}
+              {item.type === "series" && item.seasons && (
+                <span className="text-gray-400 text-sm">
+                  {item.seasons} temp.
+                </span>
+              )}
+              {item.type === "series" && item.episodes && (
+                <span className="text-gray-400 text-sm">
+                  {item.episodes} ep.
+                </span>
+              )}
               {/* IMDb link */}
               {item.imdb_id && (
                 <a
@@ -670,13 +681,23 @@ const MovieManager = () => {
         {rank}
       </div>
       <h3 className="text-white font-bold text-sm mb-1 pr-6">{item.title}</h3>
-      <div className="flex items-center gap-2 text-xs">
+      <div className="flex items-center gap-2 text-xs mb-1">
         <span className="bg-yellow-600 text-yellow-100 px-2 py-1 rounded text-xs font-bold flex items-center gap-1">
           <Star size={10} fill="currentColor" />
           {item.rating}
         </span>
         <span className="text-gray-300">{item.year}</span>
         <span>{item.type === "series" ? "📺" : "🎬"}</span>
+      </div>
+      {/* Duración y temporadas/episodios */}
+      <div className="flex items-center gap-2 text-xs text-gray-400">
+        {item.runtime && <span>{item.runtime} min</span>}
+        {item.type === "series" && item.seasons && (
+          <span>{item.seasons} temp.</span>
+        )}
+        {item.type === "series" && item.episodes && (
+          <span>{item.episodes} ep.</span>
+        )}
       </div>
     </div>
   );

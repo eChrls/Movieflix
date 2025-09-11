@@ -78,6 +78,8 @@ class ContentUpdater {
             type === "movie"
               ? details.runtime
               : details.episode_run_time?.[0] || null,
+          seasons: type === "series" ? details.number_of_seasons : null,
+          episodes: type === "series" ? details.number_of_episodes : null,
           imdb_id: details.external_ids?.imdb_id || null,
           rating: details.vote_average || null,
           genres: details.genres ? details.genres.map((g) => g.name) : [],
@@ -161,6 +163,10 @@ class ContentUpdater {
         imdb_id: tmdbData.imdb_id || item.imdb_id,
         tmdb_id: tmdbData.tmdb_id || item.tmdb_id,
         rating: omdbData?.imdb_rating || tmdbData.rating || item.rating,
+        seasons:
+          item.type === "series" ? tmdbData.seasons || item.seasons : null,
+        episodes:
+          item.type === "series" ? tmdbData.episodes || item.episodes : null,
         genres:
           tmdbData.genres.length > 0
             ? JSON.stringify(tmdbData.genres)
@@ -180,6 +186,8 @@ class ContentUpdater {
           tmdb_id = ?,
           rating = ?,
           genres = ?,
+          seasons = ?,
+          episodes = ?,
           updated_at = CURRENT_TIMESTAMP
         WHERE id = ?
       `,
@@ -193,6 +201,8 @@ class ContentUpdater {
           updateData.tmdb_id,
           updateData.rating,
           updateData.genres,
+          updateData.seasons,
+          updateData.episodes,
           item.id,
         ]
       );
@@ -202,6 +212,10 @@ class ContentUpdater {
       console.log(`   - IMDB ID: ${updateData.imdb_id}`);
       console.log(`   - Rating: ${updateData.rating}`);
       console.log(`   - Póster: ${updateData.poster_path ? "Sí" : "No"}`);
+      if (item.type === "series") {
+        console.log(`   - Temporadas: ${updateData.seasons || "N/A"}`);
+        console.log(`   - Episodios: ${updateData.episodes || "N/A"}`);
+      }
       console.log("");
 
       this.updated++;
@@ -223,7 +237,8 @@ class ContentUpdater {
       const [incompleteContent] = await this.connection.execute(`
         SELECT
           id, title, title_en, year, type, rating, runtime, overview,
-          poster_path, backdrop_path, imdb_id, tmdb_id, platform_id
+          poster_path, backdrop_path, imdb_id, tmdb_id, platform_id,
+          seasons, episodes
         FROM content
         WHERE
           (poster_path IS NULL OR poster_path = '') OR
@@ -231,7 +246,8 @@ class ContentUpdater {
           (rating IS NULL OR rating = 0) OR
           (runtime IS NULL OR runtime = 0) OR
           (imdb_id IS NULL OR imdb_id = '') OR
-          (tmdb_id IS NULL OR tmdb_id = 0)
+          (tmdb_id IS NULL OR tmdb_id = 0) OR
+          (type = 'series' AND (seasons IS NULL OR episodes IS NULL))
         ORDER BY year DESC, title ASC
       `);
 
@@ -272,6 +288,7 @@ class ContentUpdater {
         console.log("   - Resúmenes completos");
         console.log("   - Enlaces a IMDB");
         console.log("   - Duración de películas/episodios");
+        console.log("   - Temporadas y episodios para series");
       }
     } catch (error) {
       console.error("❌ Error en actualización masiva:", error.message);
