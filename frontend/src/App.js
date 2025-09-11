@@ -563,9 +563,9 @@ const MovieManager = () => {
   );
 
   const ContentCard = ({ item, isWatched = false }) => (
-    <div className="bg-gray-card rounded-lg border border-gray-700 overflow-hidden hover:border-netflix-dark hover:shadow-lg transition-all duration-300 group font-maven">
+    <div className="bg-gray-card rounded-lg border border-gray-700 overflow-hidden hover:border-netflix-dark hover:shadow-lg transition-all duration-300 group font-maven flex flex-col h-full">
       {/* Poster Section - Más rectangular y alargado */}
-      <div className="relative">
+      <div className="relative flex-shrink-0">
         {item.poster_path ? (
           <img
             src={item.poster_path}
@@ -648,18 +648,18 @@ const MovieManager = () => {
         </div>
       </div>
 
-      <div className="p-3">
+      <div className="p-3 flex-grow flex flex-col justify-between">
         <div className="flex justify-between items-start mb-2">
           <div className="flex-1 min-w-0">
             <h3
-              className="text-white font-semibold text-sm sm:text-base mb-1 truncate font-maven"
+              className="text-white font-semibold text-sm sm:text-base mb-1 leading-tight font-maven break-words hyphens-auto"
               title={item.title}
             >
               {item.title}
             </h3>
             {item.title_en && item.title_en !== item.title && (
               <p
-                className="text-gray-400 text-xs mb-1 truncate font-maven"
+                className="text-gray-400 text-xs mb-1 leading-tight font-maven break-words hyphens-auto"
                 title={item.title_en}
               >
                 {item.title_en}
@@ -775,7 +775,7 @@ const MovieManager = () => {
       <div className="absolute -top-2 -left-2 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-full w-5 h-5 flex items-center justify-center font-bold text-xs shadow-lg font-tech">
         {rank}
       </div>
-      <h3 className="text-white font-semibold text-xs sm:text-sm mb-1 pr-4 font-maven">
+      <h3 className="text-white font-semibold text-xs sm:text-sm mb-1 pr-4 font-maven leading-snug break-words">
         {item.title}
       </h3>
       <div className="flex items-center gap-1 text-xs mb-1">
@@ -1029,9 +1029,9 @@ const MovieManager = () => {
           </div>
         </div>
 
-        {/* Content Grid - Optimizado para móvil */}
+        {/* Content Grid - Optimizado para móvil con altura uniforme */}
         {filteredContent.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 auto-rows-max">
             {filteredContent.map((item) => (
               <ContentCard
                 key={item.id}
