@@ -46,6 +46,11 @@ const MovieManager = () => {
   const [showSuggestions, setShowSuggestions] = useState(false); // Mostrar dropdown de sugerencias
   const [debounceTimer, setDebounceTimer] = useState(null); // Timer para debounce
 
+  // 🔒 Sistema de acceso sencillo
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [accessCode, setAccessCode] = useState("");
+  const [accessError, setAccessError] = useState("");
+
   const [newContent, setNewContent] = useState({
     title: "",
     title_en: "",
@@ -167,6 +172,11 @@ const MovieManager = () => {
     };
 
     initializeApp();
+  }, []);
+
+  // 🔒 Verificar acceso al cargar
+  useEffect(() => {
+    checkAccess();
   }, []);
 
   useEffect(() => {
@@ -494,6 +504,44 @@ const MovieManager = () => {
       loadTopContent();
     } catch (error) {
       console.error("Error deleting content:", error);
+    }
+  };
+
+  // 🔒 Funciones de acceso simple con sesión de 30 días
+  const checkAccess = () => {
+    const accessData = localStorage.getItem("movieflix_access");
+    if (accessData) {
+      try {
+        const { granted, timestamp } = JSON.parse(accessData);
+        const thirtyDays = 30 * 24 * 60 * 60 * 1000; // 30 días en ms
+        const now = Date.now();
+
+        if (granted && now - timestamp < thirtyDays) {
+          setIsAuthenticated(true);
+          return;
+        }
+      } catch (e) {
+        // Si hay error parseando, limpiar localStorage
+        localStorage.removeItem("movieflix_access");
+      }
+    }
+    // Si no hay acceso válido, mantener isAuthenticated como false
+  };
+
+  const handleAccessSubmit = (e) => {
+    e.preventDefault();
+    if (accessCode === "5202") {
+      const accessData = {
+        granted: true,
+        timestamp: Date.now(),
+      };
+      localStorage.setItem("movieflix_access", JSON.stringify(accessData));
+      setIsAuthenticated(true);
+      setAccessCode("");
+      setAccessError("");
+    } else {
+      setAccessError("Código incorrecto");
+      setAccessCode("");
     }
   };
 
@@ -846,6 +894,46 @@ const MovieManager = () => {
           >
             Reintentar
           </button>
+        </div>
+      </div>
+    );
+  }
+
+  // 🔒 Verificación de acceso
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="bg-gray-900 p-8 rounded-lg shadow-2xl max-w-md w-full mx-4">
+          <div className="text-center mb-6">
+            <h1 className="text-3xl font-bold text-netflix mb-2">
+              🎬 MovieFlix
+            </h1>
+            <p className="text-gray-300">Introduce el código de acceso</p>
+          </div>
+
+          <form onSubmit={handleAccessSubmit} className="space-y-4">
+            <div>
+              <input
+                type="password"
+                value={accessCode}
+                onChange={(e) => setAccessCode(e.target.value)}
+                placeholder="Código de acceso"
+                className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-netflix"
+                autoFocus
+              />
+            </div>
+
+            {accessError && (
+              <p className="text-red-500 text-sm text-center">{accessError}</p>
+            )}
+
+            <button
+              type="submit"
+              className="w-full bg-netflix hover:bg-red-700 text-white py-3 px-4 rounded-lg transition-colors font-medium"
+            >
+              Acceder
+            </button>
+          </form>
         </div>
       </div>
     );
