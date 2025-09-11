@@ -311,7 +311,7 @@ const MovieManager = () => {
       const data = await apiCall(
         `/search/suggestions?query=${encodeURIComponent(query)}`
       );
-      
+
       if (data && data.results) {
         setSearchSuggestions(data.results.slice(0, 5)); // Limitar a 5 sugerencias
         setShowSuggestions(true);
@@ -329,23 +329,35 @@ const MovieManager = () => {
       ...newContent,
       title: suggestion.title || suggestion.name,
       title_en: suggestion.original_title || suggestion.original_name,
-      year: suggestion.release_date ? suggestion.release_date.split('-')[0] : suggestion.first_air_date ? suggestion.first_air_date.split('-')[0] : '',
-      type: suggestion.media_type === 'tv' ? 'series' : 'movie',
+      year: suggestion.release_date
+        ? suggestion.release_date.split("-")[0]
+        : suggestion.first_air_date
+        ? suggestion.first_air_date.split("-")[0]
+        : "",
+      type: suggestion.media_type === "tv" ? "series" : "movie",
       tmdb_id: suggestion.id,
-      poster_path: suggestion.poster_path ? `https://image.tmdb.org/t/p/w500${suggestion.poster_path}` : '',
-      backdrop_path: suggestion.backdrop_path ? `https://image.tmdb.org/t/p/w1280${suggestion.backdrop_path}` : '',
+      poster_path: suggestion.poster_path
+        ? `https://image.tmdb.org/t/p/w500${suggestion.poster_path}`
+        : "",
+      backdrop_path: suggestion.backdrop_path
+        ? `https://image.tmdb.org/t/p/w1280${suggestion.backdrop_path}`
+        : "",
       overview: suggestion.overview,
     });
 
     // Buscar datos adicionales (rating, duración, etc.)
     const enhancedData = await searchEnhancedAPI(
       suggestion.title || suggestion.name,
-      suggestion.release_date ? suggestion.release_date.split('-')[0] : suggestion.first_air_date ? suggestion.first_air_date.split('-')[0] : '',
-      suggestion.media_type === 'tv' ? 'series' : 'movie'
+      suggestion.release_date
+        ? suggestion.release_date.split("-")[0]
+        : suggestion.first_air_date
+        ? suggestion.first_air_date.split("-")[0]
+        : "",
+      suggestion.media_type === "tv" ? "series" : "movie"
     );
 
     if (enhancedData) {
-      setNewContent(prev => ({
+      setNewContent((prev) => ({
         ...prev,
         rating: enhancedData.rating || prev.rating,
         runtime: enhancedData.runtime || prev.runtime,
@@ -654,7 +666,9 @@ const MovieManager = () => {
               </p>
             )}
             <div className="flex items-center gap-2 mb-1 flex-wrap">
-              <span className="text-gray-400 text-xs font-tech">{item.year}</span>
+              <span className="text-gray-400 text-xs font-tech">
+                {item.year}
+              </span>
               {item.runtime && (
                 <span className="text-gray-400 text-xs font-tech">
                   {item.runtime} min
@@ -810,7 +824,9 @@ const MovieManager = () => {
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-red-600 mx-auto mb-4"></div>
-          <h1 className="text-2xl font-bold text-netflix mb-2 font-maven">MovieFlix</h1>
+          <h1 className="text-2xl font-bold text-netflix mb-2 font-maven">
+            MovieFlix
+          </h1>
           <p className="text-white">Cargando tu gestor personal...</p>
         </div>
       </div>
@@ -899,7 +915,7 @@ const MovieManager = () => {
               <h2 className="text-xl font-bold mb-4 text-netflix flex items-center gap-2 font-maven">
                 🏆 Top 3
               </h2>
-              
+
               {/* Pestañas */}
               <div className="flex mb-4 bg-gray-card rounded-lg p-1 w-fit">
                 <button
