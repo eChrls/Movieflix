@@ -9,8 +9,8 @@ import {
   Trash2,
   Loader2,
   AlertCircle,
-  Wifi,
   WifiOff,
+  ChevronUp,
 } from "lucide-react";
 
 const API_BASE =
@@ -40,6 +40,7 @@ const MovieManager = () => {
   const [error, setError] = useState(null);
   const [searchLoading, setSearchLoading] = useState(false);
   const [showPlatformMenu, setShowPlatformMenu] = useState(null); // Para el menú de plataformas
+  const [showScrollTop, setShowScrollTop] = useState(false); // Para el botón volver arriba
 
   const [newContent, setNewContent] = useState({
     title: "",
@@ -67,14 +68,20 @@ const MovieManager = () => {
         setShowPlatformMenu(null);
       }
     };
+    const handleScroll = () => {
+      // Mostrar botón volver arriba cuando se hace scroll hacia abajo
+      setShowScrollTop(window.pageYOffset > 300);
+    };
 
     window.addEventListener("online", handleOnline);
     window.addEventListener("offline", handleOffline);
+    window.addEventListener("scroll", handleScroll);
     document.addEventListener("click", handleClickOutside);
 
     return () => {
       window.removeEventListener("online", handleOnline);
       window.removeEventListener("offline", handleOffline);
+      window.removeEventListener("scroll", handleScroll);
       document.removeEventListener("click", handleClickOutside);
     };
   }, []);
@@ -451,6 +458,14 @@ const MovieManager = () => {
     return colors[platformName] || "#333333";
   };
 
+  // Función para scroll hacia arriba
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
+
   // Components
   const LoadingSpinner = () => (
     <div className="flex items-center justify-center p-8">
@@ -458,26 +473,30 @@ const MovieManager = () => {
     </div>
   );
 
-  const ConnectionStatus = () => (
-    <div
-      className={`fixed bottom-4 right-4 px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-2 z-50 transition-all duration-300 ${
-        isOnline ? "bg-green-600 text-white" : "bg-red-600 text-white"
+  const ScrollToTopButton = () => (
+    <button
+      onClick={scrollToTop}
+      className={`fixed bottom-4 right-4 bg-red-600 hover:bg-red-700 text-white p-3 rounded-full shadow-lg transition-all duration-300 z-50 ${
+        showScrollTop
+          ? "opacity-100 translate-y-0"
+          : "opacity-0 translate-y-4 pointer-events-none"
       }`}
+      title="Volver arriba"
+      aria-label="Volver arriba"
     >
-      {isOnline ? <Wifi size={16} /> : <WifiOff size={16} />}
-      {isOnline ? "Conectado" : "Sin conexión"}
-    </div>
+      <ChevronUp size={20} />
+    </button>
   );
 
   const ContentCard = ({ item, isWatched = false }) => (
     <div className="bg-gray-900 rounded-lg border border-gray-800 overflow-hidden hover:border-gray-700 hover:shadow-lg transition-all duration-300 group">
-      {/* Poster Section */}
+      {/* Poster Section - Más rectangular y alargado */}
       <div className="relative">
         {item.poster_path ? (
           <img
             src={item.poster_path}
             alt={item.title}
-            className="w-full h-48 object-cover"
+            className="w-full h-64 sm:h-72 object-contain bg-gray-800"
             loading="lazy"
             onError={(e) => {
               // Fallback si la imagen no carga
@@ -489,7 +508,7 @@ const MovieManager = () => {
 
         {/* Fallback cuando no hay poster */}
         <div
-          className={`w-full h-48 bg-gray-800 flex items-center justify-center ${
+          className={`w-full h-64 sm:h-72 bg-gray-800 flex items-center justify-center ${
             item.poster_path ? "hidden" : "flex"
           }`}
         >
@@ -555,38 +574,38 @@ const MovieManager = () => {
         </div>
       </div>
 
-      <div className="p-4">
-        <div className="flex justify-between items-start mb-3">
+      <div className="p-3">
+        <div className="flex justify-between items-start mb-2">
           <div className="flex-1 min-w-0">
             <h3
-              className="text-white font-semibold text-lg mb-1 truncate"
+              className="text-white font-semibold text-sm sm:text-base mb-1 truncate"
               title={item.title}
             >
               {item.title}
             </h3>
             {item.title_en && item.title_en !== item.title && (
               <p
-                className="text-gray-400 text-sm mb-1 truncate"
+                className="text-gray-400 text-xs mb-1 truncate"
                 title={item.title_en}
               >
                 {item.title_en}
               </p>
             )}
-            <div className="flex items-center gap-2 mb-2 flex-wrap">
-              <span className="text-gray-400 text-sm">{item.year}</span>
+            <div className="flex items-center gap-1 mb-1 flex-wrap">
+              <span className="text-gray-400 text-xs">{item.year}</span>
               {item.runtime && (
-                <span className="text-gray-400 text-sm">
+                <span className="text-gray-400 text-xs">
                   {item.runtime} min
                 </span>
               )}
               {/* Temporadas y episodios para series */}
               {item.type === "series" && item.seasons && (
-                <span className="text-gray-400 text-sm">
+                <span className="text-gray-400 text-xs">
                   {item.seasons} temp.
                 </span>
               )}
               {item.type === "series" && item.episodes && (
-                <span className="text-gray-400 text-sm">
+                <span className="text-gray-400 text-xs">
                   {item.episodes} ep.
                 </span>
               )}
@@ -676,21 +695,23 @@ const MovieManager = () => {
   );
 
   const TopCard = ({ item, rank }) => (
-    <div className="relative bg-gradient-to-br from-red-900 to-gray-900 rounded-lg p-4 border border-red-800 hover:border-red-600 transition-all duration-300 group">
-      <div className="absolute -top-2 -left-2 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm shadow-lg">
+    <div className="relative bg-gradient-to-br from-red-900 to-gray-900 rounded-lg p-3 border border-red-800 hover:border-red-600 transition-all duration-300 group">
+      <div className="absolute -top-2 -left-2 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-full w-6 h-6 flex items-center justify-center font-bold text-xs shadow-lg">
         {rank}
       </div>
-      <h3 className="text-white font-bold text-sm mb-1 pr-6">{item.title}</h3>
-      <div className="flex items-center gap-2 text-xs mb-1">
-        <span className="bg-yellow-600 text-yellow-100 px-2 py-1 rounded text-xs font-bold flex items-center gap-1">
-          <Star size={10} fill="currentColor" />
+      <h3 className="text-white font-bold text-xs sm:text-sm mb-1 pr-4">
+        {item.title}
+      </h3>
+      <div className="flex items-center gap-1 text-xs mb-1">
+        <span className="bg-yellow-600 text-yellow-100 px-1 py-0.5 rounded text-xs font-bold flex items-center gap-1">
+          <Star size={8} fill="currentColor" />
           {item.rating}
         </span>
         <span className="text-gray-300">{item.year}</span>
         <span>{item.type === "series" ? "📺" : "🎬"}</span>
       </div>
       {/* Duración y temporadas/episodios */}
-      <div className="flex items-center gap-2 text-xs text-gray-400">
+      <div className="flex items-center gap-1 text-xs text-gray-400">
         {item.runtime && <span>{item.runtime} min</span>}
         {item.type === "series" && item.seasons && (
           <span>{item.seasons} temp.</span>
@@ -736,8 +757,6 @@ const MovieManager = () => {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      <ConnectionStatus />
-
       {/* Header */}
       <header className="bg-gray-950 border-b border-gray-800 sticky top-0 z-40 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 py-4">
@@ -920,9 +939,9 @@ const MovieManager = () => {
           </div>
         </div>
 
-        {/* Content Grid */}
+        {/* Content Grid - Optimizado para móvil */}
         {filteredContent.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
             {filteredContent.map((item) => (
               <ContentCard
                 key={item.id}
@@ -1297,6 +1316,9 @@ const MovieManager = () => {
           </button>
         </div>
       )}
+
+      {/* Botón volver arriba */}
+      <ScrollToTopButton />
     </div>
   );
 };
