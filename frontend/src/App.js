@@ -563,14 +563,14 @@ const MovieManager = () => {
   );
 
   const ContentCard = ({ item, isWatched = false }) => (
-    <div className="bg-gray-card rounded-lg border border-gray-700 overflow-hidden hover:border-netflix-dark hover:shadow-lg transition-all duration-300 group font-maven flex flex-col h-full">
+    <div className="bg-gray-card rounded-lg border border-gray-700 overflow-hidden hover:border-netflix-dark hover:shadow-lg transition-all duration-300 group font-maven">
       {/* Poster Section - Más rectangular y alargado */}
-      <div className="relative flex-shrink-0">
+      <div className="relative">
         {item.poster_path ? (
           <img
             src={item.poster_path}
             alt={item.title}
-            className="w-full h-48 sm:h-56 object-cover bg-gray-800"
+            className="w-full h-40 sm:h-48 object-cover bg-gray-800"
             loading="lazy"
             onError={(e) => {
               // Fallback si la imagen no carga
@@ -582,7 +582,7 @@ const MovieManager = () => {
 
         {/* Fallback cuando no hay poster */}
         <div
-          className={`w-full h-48 sm:h-56 bg-gray-800 flex items-center justify-center ${
+          className={`w-full h-40 sm:h-48 bg-gray-800 flex items-center justify-center ${
             item.poster_path ? "hidden" : "flex"
           }`}
         >
@@ -648,18 +648,18 @@ const MovieManager = () => {
         </div>
       </div>
 
-      <div className="p-3 flex-grow flex flex-col justify-between">
-        <div className="flex justify-between items-start mb-2">
-          <div className="flex-1 min-w-0">
+      <div className="p-3">
+        <div className="mb-2">
+          <div>
             <h3
-              className="text-white font-semibold text-sm sm:text-base mb-1 leading-tight font-maven break-words hyphens-auto"
+              className="text-white font-semibold text-sm sm:text-base mb-1 leading-relaxed font-maven break-words"
               title={item.title}
             >
               {item.title}
             </h3>
             {item.title_en && item.title_en !== item.title && (
               <p
-                className="text-gray-400 text-xs mb-1 leading-tight font-maven break-words hyphens-auto"
+                className="text-gray-400 text-xs mb-1 leading-relaxed font-maven break-words"
                 title={item.title_en}
               >
                 {item.title_en}
