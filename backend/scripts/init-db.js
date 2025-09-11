@@ -196,7 +196,7 @@ async function initDatabase() {
       {
         name: "Movistar+",
         icon: "📡",
-        color: "#00B7ED",
+        color: "#3A3A3A",
         url: "https://movistarplus.es",
       },
       {

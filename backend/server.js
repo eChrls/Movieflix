@@ -539,6 +539,106 @@ app.get("/api/search/enhanced", async (req, res) => {
   }
 });
 
+// Get search suggestions with autocomplete dropdown
+app.get("/api/search/suggestions", async (req, res) => {
+  try {
+    const { query } = req.query;
+
+    if (!query || query.length < 3) {
+      return res.json({ results: [] });
+    }
+
+    if (!process.env.TMDB_API_KEY) {
+      return res.status(500).json({ 
+        error: "TMDb API key no configurada",
+        results: [] 
+      });
+    }
+
+    console.log(`🔍 Obteniendo sugerencias para: "${query}"`);
+
+    // Búsqueda combinada en TMDb (películas y series)
+    const movieSearchUrl = `https://api.themoviedb.org/3/search/movie?api_key=${
+      process.env.TMDB_API_KEY
+    }&query=${encodeURIComponent(query)}&language=es-ES&include_adult=false`;
+
+    const tvSearchUrl = `https://api.themoviedb.org/3/search/tv?api_key=${
+      process.env.TMDB_API_KEY
+    }&query=${encodeURIComponent(query)}&language=es-ES&include_adult=false`;
+
+    // Realizar búsquedas en paralelo para optimizar velocidad
+    const [movieResponse, tvResponse] = await Promise.all([
+      axios.get(movieSearchUrl, { timeout: 3000 }),
+      axios.get(tvSearchUrl, { timeout: 3000 })
+    ]);
+
+    const suggestions = [];
+
+    // Procesar resultados de películas
+    if (movieResponse.data.results) {
+      movieResponse.data.results.slice(0, 3).forEach(movie => {
+        suggestions.push({
+          id: movie.id,
+          title: movie.title,
+          original_title: movie.original_title,
+          year: movie.release_date ? movie.release_date.split('-')[0] : '',
+          media_type: 'movie',
+          poster_path: movie.poster_path,
+          backdrop_path: movie.backdrop_path,
+          overview: movie.overview,
+          release_date: movie.release_date,
+          display_title: `${movie.title}${movie.release_date ? ` (${movie.release_date.split('-')[0]})` : ''}`
+        });
+      });
+    }
+
+    // Procesar resultados de series
+    if (tvResponse.data.results) {
+      tvResponse.data.results.slice(0, 3).forEach(tv => {
+        suggestions.push({
+          id: tv.id,
+          title: tv.name,
+          name: tv.name,
+          original_title: tv.original_name,
+          original_name: tv.original_name,
+          year: tv.first_air_date ? tv.first_air_date.split('-')[0] : '',
+          media_type: 'tv',
+          poster_path: tv.poster_path,
+          backdrop_path: tv.backdrop_path,
+          overview: tv.overview,
+          first_air_date: tv.first_air_date,
+          display_title: `${tv.name}${tv.first_air_date ? ` (${tv.first_air_date.split('-')[0]})` : ''}`
+        });
+      });
+    }
+
+    // Ordenar por popularidad y limitar a 5 resultados
+    suggestions.sort((a, b) => {
+      // Priorizar resultados que comiencen con el query
+      const aStartsWith = (a.title || a.name || '').toLowerCase().startsWith(query.toLowerCase());
+      const bStartsWith = (b.title || b.name || '').toLowerCase().startsWith(query.toLowerCase());
+      
+      if (aStartsWith && !bStartsWith) return -1;
+      if (!aStartsWith && bStartsWith) return 1;
+      
+      return 0;
+    });
+
+    res.json({ 
+      results: suggestions.slice(0, 5),
+      query: query,
+      total_results: suggestions.length
+    });
+
+  } catch (error) {
+    console.error("Error obteniendo sugerencias:", error);
+    res.status(500).json({ 
+      error: "Error interno del servidor",
+      results: [] 
+    });
+  }
+});
+
 // Search for movie rating (with cache)
 app.get("/api/search", async (req, res) => {
   try {

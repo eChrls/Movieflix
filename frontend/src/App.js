@@ -44,6 +44,7 @@ const MovieManager = () => {
   const [topActiveTab, setTopActiveTab] = useState("movies"); // Para las pestañas del Top 3
   const [searchSuggestions, setSearchSuggestions] = useState([]); // Para sugerencias de búsqueda
   const [showSuggestions, setShowSuggestions] = useState(false); // Mostrar dropdown de sugerencias
+  const [debounceTimer, setDebounceTimer] = useState(null); // Timer para debounce
 
   const [newContent, setNewContent] = useState({
     title: "",
@@ -69,6 +70,10 @@ const MovieManager = () => {
       // Cerrar menú de plataformas si se hace click fuera
       if (!event.target.closest(".platform-menu-container")) {
         setShowPlatformMenu(null);
+      }
+      // Cerrar dropdown de sugerencias si se hace click fuera
+      if (!event.target.closest(".search-suggestions-container")) {
+        setShowSuggestions(false);
       }
     };
     const handleScroll = () => {
@@ -299,41 +304,68 @@ const MovieManager = () => {
     }
   };
 
-  // Función para obtener sugerencias de búsqueda
+  // Función para obtener sugerencias de búsqueda con debounce optimizado
   const getSearchSuggestions = async (query) => {
-    if (!query || query.length < 2) {
+    if (!query || query.length < 3) {
       setSearchSuggestions([]);
       setShowSuggestions(false);
       return;
     }
 
     try {
+      console.log(`🔍 Buscando sugerencias para: "${query}"`);
       const data = await apiCall(
         `/search/suggestions?query=${encodeURIComponent(query)}`
       );
 
       if (data && data.results) {
-        setSearchSuggestions(data.results.slice(0, 5)); // Limitar a 5 sugerencias
+        setSearchSuggestions(data.results); // Ya limitado a 5 en backend
         setShowSuggestions(true);
+      } else {
+        setSearchSuggestions([]);
+        setShowSuggestions(false);
       }
     } catch (error) {
-      console.error("Error getting suggestions:", error);
+      console.error("Error obteniendo sugerencias:", error);
       setSearchSuggestions([]);
       setShowSuggestions(false);
     }
   };
 
+  // Función con debounce para optimizar llamadas API
+  const handleSearchInputChange = (value) => {
+    setNewContent({
+      ...newContent,
+      title: value,
+    });
+
+    // Limpiar timer anterior si existe
+    if (debounceTimer) {
+      clearTimeout(debounceTimer);
+    }
+
+    // Crear nuevo timer para debounce de 500ms (profesional)
+    const newTimer = setTimeout(() => {
+      getSearchSuggestions(value);
+    }, 500);
+
+    setDebounceTimer(newTimer);
+  };
+
   // Función para seleccionar una sugerencia y completar el formulario
   const selectSuggestion = async (suggestion) => {
-    setNewContent({
+    console.log(`✅ Seleccionando: ${suggestion.display_title}`);
+    
+    // Cerrar dropdown inmediatamente para mejor UX
+    setShowSuggestions(false);
+    setSearchSuggestions([]);
+
+    // Actualizar formulario con datos básicos de la sugerencia
+    const updatedContent = {
       ...newContent,
       title: suggestion.title || suggestion.name,
       title_en: suggestion.original_title || suggestion.original_name,
-      year: suggestion.release_date
-        ? suggestion.release_date.split("-")[0]
-        : suggestion.first_air_date
-        ? suggestion.first_air_date.split("-")[0]
-        : "",
+      year: suggestion.year,
       type: suggestion.media_type === "tv" ? "series" : "movie",
       tmdb_id: suggestion.id,
       poster_path: suggestion.poster_path
@@ -342,32 +374,33 @@ const MovieManager = () => {
       backdrop_path: suggestion.backdrop_path
         ? `https://image.tmdb.org/t/p/w1280${suggestion.backdrop_path}`
         : "",
-      overview: suggestion.overview,
-    });
+      overview: suggestion.overview || "",
+    };
 
-    // Buscar datos adicionales (rating, duración, etc.)
-    const enhancedData = await searchEnhancedAPI(
-      suggestion.title || suggestion.name,
-      suggestion.release_date
-        ? suggestion.release_date.split("-")[0]
-        : suggestion.first_air_date
-        ? suggestion.first_air_date.split("-")[0]
-        : "",
-      suggestion.media_type === "tv" ? "series" : "movie"
-    );
+    setNewContent(updatedContent);
 
-    if (enhancedData) {
-      setNewContent((prev) => ({
-        ...prev,
-        rating: enhancedData.rating || prev.rating,
-        runtime: enhancedData.runtime || prev.runtime,
-        genres: enhancedData.genres || prev.genres,
-        imdb_id: enhancedData.imdb_id || prev.imdb_id,
-      }));
+    // Buscar datos adicionales de manera asíncrona (rating, duración, géneros)
+    try {
+      const enhancedData = await searchEnhancedAPI(
+        suggestion.title || suggestion.name,
+        suggestion.year,
+        suggestion.media_type === "tv" ? "series" : "movie"
+      );
+
+      if (enhancedData) {
+        setNewContent((prev) => ({
+          ...prev,
+          rating: enhancedData.rating || prev.rating,
+          runtime: enhancedData.runtime || prev.runtime,
+          genres: enhancedData.genres || prev.genres,
+          imdb_id: enhancedData.imdb_id || prev.imdb_id,
+        }));
+        console.log(`🎯 Datos completos cargados para: ${suggestion.display_title}`);
+      }
+    } catch (error) {
+      console.error("Error cargando datos adicionales:", error);
+      // No es crítico, los datos básicos ya están cargados
     }
-
-    setShowSuggestions(false);
-    setSearchSuggestions([]);
   };
 
   // Función para cambiar plataforma
@@ -1111,19 +1144,64 @@ const MovieManager = () => {
                       Título *
                     </label>
                     <div className="flex gap-2">
-                      <input
-                        type="text"
-                        value={newContent.title}
-                        onChange={(e) =>
-                          setNewContent({
-                            ...newContent,
-                            title: e.target.value,
-                          })
-                        }
-                        className="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-red-600 transition-colors"
-                        placeholder="Título de la película o serie"
-                        required
-                      />
+                      <div className="flex-1 relative search-suggestions-container">
+                        <input
+                          type="text"
+                          value={newContent.title}
+                          onChange={(e) => handleSearchInputChange(e.target.value)}
+                          onFocus={() => {
+                            if (searchSuggestions.length > 0) {
+                              setShowSuggestions(true);
+                            }
+                          }}
+                          className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-red-600 transition-colors"
+                          placeholder="Escribe el título de la película o serie..."
+                          required
+                        />
+                        
+                        {/* Dropdown de sugerencias */}
+                        {showSuggestions && searchSuggestions.length > 0 && (
+                          <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-gray-900 border border-gray-700 rounded-lg shadow-xl max-h-60 overflow-y-auto">
+                            {searchSuggestions.map((suggestion, index) => (
+                              <div
+                                key={`${suggestion.id}-${suggestion.media_type}`}
+                                onClick={() => selectSuggestion(suggestion)}
+                                className="px-4 py-3 hover:bg-gray-800 cursor-pointer border-b border-gray-700 last:border-b-0 transition-colors"
+                              >
+                                <div className="flex items-center gap-3">
+                                  {suggestion.poster_path ? (
+                                    <img
+                                      src={`https://image.tmdb.org/t/p/w92${suggestion.poster_path}`}
+                                      alt={suggestion.display_title}
+                                      className="w-8 h-12 object-cover rounded"
+                                    />
+                                  ) : (
+                                    <div className="w-8 h-12 bg-gray-700 rounded flex items-center justify-center">
+                                      {suggestion.media_type === 'tv' ? '📺' : '🎬'}
+                                    </div>
+                                  )}
+                                  <div className="flex-1 min-w-0">
+                                    <div className="font-medium text-white truncate">
+                                      {suggestion.display_title}
+                                    </div>
+                                    <div className="text-sm text-gray-400 mt-1">
+                                      {suggestion.media_type === 'tv' ? 'Serie' : 'Película'}
+                                      {suggestion.year && ` • ${suggestion.year}`}
+                                    </div>
+                                    {suggestion.overview && (
+                                      <div className="text-xs text-gray-500 mt-1 line-clamp-2">
+                                        {suggestion.overview.length > 80 
+                                          ? `${suggestion.overview.substring(0, 80)}...` 
+                                          : suggestion.overview}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                       <button
                         type="button"
                         onClick={async () => {

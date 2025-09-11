@@ -60,19 +60,26 @@
         theme: {
           extend: {
             colors: {
-              netflix: "#E50914",
-              "netflix-dark": "#B81D24",
-              "netflix-darker": "#8B0000", // Rojo más oscuro para cartas
-              "netflix-light": "#F40612",
+              // Rojos metalizados con brillo real
+              netflix: "linear-gradient(135deg, #CC0C1C 0%, #8B0000 50%, #660000 100%)",
+              "netflix-metallic": "#8B0000",
+              "netflix-dark": "#660000",
+              "netflix-darker": "#4A0000", // Rojo metálico más oscuro
+              "netflix-light": "#CC0C1C",
+              "netflix-shine": "#FF1F2F", // Para efectos de brillo
+              // Fondos complejos
               "gray-950": "#0a0a0a",
               "gray-carbon": "#1a1a1a", // Gris carbón para fondo
+              "gray-metallic": "#2C2C2C", // Gris metalizado
               "gray-card": "#2a2a2a", // Gris para cartas
+              "gray-shine": "#404040", // Para efectos metálicos
+              // Plataformas actualizadas
               hbo: "#9B59B6",
               prime: "#00A8E1",
               apple: "#000000",
               disney: "#113CCF",
               skyshowtime: "#0064FF",
-              movistar: "#00B7ED",
+              movistar: "#3A3A3A", // Actualizado a gris antracita
               filmin: "#FF6B35",
               criterion: "#FFD700",
               shudder: "#FF4500",
@@ -124,7 +131,8 @@
     <link rel="dns-prefetch" href="//api.themoviedb.org" />
     <link rel="dns-prefetch" href="//www.omdbapi.com" />
   </head>
-  <body class="bg-gray-carbon text-white antialiased font-maven">
+  <body class="antialiased font-maven" style="background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 25%, #2C2C2C 50%, #1a1a1a 75%, #0a0a0a 100%); background-attachment: fixed; color: white;">
+    <div class="absolute inset-0 opacity-30 pointer-events-none" style="background: radial-gradient(ellipse at top left, rgba(204, 12, 28, 0.1) 0%, transparent 50%), radial-gradient(ellipse at bottom right, rgba(44, 44, 44, 0.2) 0%, transparent 50%);"></div>
     <noscript>
       <div
         style="
