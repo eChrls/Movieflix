@@ -17,6 +17,21 @@ Una aplicación web moderna para gestionar tu colección personal de películas 
 - **🔗 Integración APIs**: OMDb y TMDb para información automática
 - **🏷️ Clasificación Inteligente**: Sistema de géneros y plataformas
 
+## 🎭 Modo Demo para Portfolio
+
+MovieFlix incluye un **modo demostración interactivo** perfecto para portfolios:
+
+- **✅ Funcionalidad Completa**: Todas las características funcionan normalmente
+- **🔒 Datos Simulados**: Sin conexión a base de datos real
+- **⚡ Deploy Independiente**: URL separada para demos
+- **🛡️ Seguridad Integrada**: Rate limiting y sanitización automática
+
+### Acceso Demo
+
+- **URL**: [https://home-movieflix.duckdns.org/movieflix-demo](https://home-movieflix.duckdns.org/movieflix-demo)
+- **Código**: `5202`
+- **Documentación**: [Demo Mode Guide](docs/demo-mode.md)
+
 ## 🛠️ Stack Tecnológico
 
 ### Backend

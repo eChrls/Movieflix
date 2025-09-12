@@ -12,6 +12,7 @@ import {
   WifiOff,
   ChevronUp,
 } from "lucide-react";
+import DemoNotice from "./components/DemoNotice";
 
 const API_BASE =
   process.env.NODE_ENV === "production" ? "/api" : "http://localhost:3001/api";
@@ -1075,6 +1076,9 @@ const MovieManager = () => {
 
   return (
     <div className="min-h-screen bg-gray-carbon text-white font-maven">
+      {/* 🎭 Banner Demo (solo aparece en modo demo) */}
+      <DemoNotice />
+
       {/* Header */}
       <header className="bg-gray-950 border-b border-gray-700 sticky top-0 z-40 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 py-4">

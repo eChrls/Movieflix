@@ -229,3 +229,22 @@ ssl.local.conf
 
 # DynamoDB Local files
 .dynamodb/
+
+# =====================================
+# MODO DEMO - ARCHIVOS ESPECÍFICOS
+# =====================================
+
+# Variables de entorno específicas para demo
+.env.demo
+backend/.env.demo
+frontend/.env.demo
+
+# Logs específicos de demo
+logs/demo-*.log
+backend/logs/demo-*.log
+
+# Configuraciones PM2 con credenciales
+ecosystem.demo.config.js
+
+# Documentación de demo con información sensible (mantener demo-mode.md)
+docs/demo-private.md
