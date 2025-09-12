@@ -12,10 +12,11 @@ echo =====================================
 echo.
 echo PASO 1: Subir archivos al servidor Orange Pi
 echo ---------------------------------------------
-echo scp scripts/fix-db-permissions.sql usuario@192.168.1.50:/home/movieflix/MovieFlix/scripts/
-echo scp scripts/diagnose-and-fix.sh usuario@192.168.1.50:/home/movieflix/MovieFlix/scripts/
-echo scp ecosystem.config.js usuario@192.168.1.50:/home/movieflix/MovieFlix/
-echo scp backend/server.js usuario@192.168.1.50:/home/movieflix/MovieFlix/backend/
+echo scp scripts/fix-db-permissions.sql casa74b@192.168.1.50:/var/www/MovieFlix/scripts/
+echo scp scripts/diagnose-and-fix.sh casa74b@192.168.1.50:/var/www/MovieFlix/scripts/
+echo scp scripts/fix-immediate.sh casa74b@192.168.1.50:/var/www/MovieFlix/scripts/
+echo scp ecosystem.config.js casa74b@192.168.1.50:/var/www/MovieFlix/
+echo scp backend/server.js casa74b@192.168.1.50:/var/www/MovieFlix/backend/
 
 echo.
 echo PASO 2: Conectar al servidor y ejecutar reparaciones
@@ -25,7 +26,7 @@ echo ssh usuario@192.168.1.50
 echo.
 echo PASO 3: En el servidor, ejecutar los siguientes comandos:
 echo --------------------------------------------------------
-echo cd /home/movieflix/MovieFlix
+echo cd /var/www/MovieFlix
 
 echo.
 echo # 3.1 Arreglar permisos de base de datos
