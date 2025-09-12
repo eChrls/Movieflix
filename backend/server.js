@@ -47,27 +47,69 @@ app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 // Database connection pool - Configuración corregida para MySQL2
 const dbPool = mysql.createPool({
   host: process.env.DB_HOST || "localhost",
-  user: process.env.DB_USER || "root", // Cambiar a root temporalmente
-  password: process.env.DB_PASSWORD || "$@msunG--2025", // Usar credencial del Orange Pi
+  user: process.env.DB_USER || "movieflix_user", // Volver a usar movieflix_user
+  password: process.env.DB_PASSWORD || "movieflix_secure_2025!",
   database: process.env.DB_NAME || "movieflix_db",
   port: process.env.DB_PORT || 3306,
   connectionLimit: 10,
   queueLimit: 0,
-  // Removidas configuraciones obsoletas para MySQL2
+  acquireTimeout: 60000,
+  timeout: 60000,
+  reconnect: true,
   charset: "utf8mb4",
 });
 
-// Test database connection
+// Test database connection with detailed diagnostics
 async function testConnection() {
   try {
+    console.log("🔄 Probando conexión a la base de datos...");
+    console.log(`   Host: ${process.env.DB_HOST || "localhost"}`);
+    console.log(`   Usuario: ${process.env.DB_USER || "movieflix_user"}`);
+    console.log(`   Base de datos: ${process.env.DB_NAME || "movieflix_db"}`);
+
     const connection = await dbPool.getConnection();
     console.log("✅ Conexión a la base de datos establecida correctamente");
+
+    // Verificar que hay datos
+    const [contentCount] = await connection.execute(
+      "SELECT COUNT(*) as count FROM content"
+    );
+    const [profilesCount] = await connection.execute(
+      "SELECT COUNT(*) as count FROM profiles"
+    );
+
+    console.log(
+      `📊 Contenido en BD: ${contentCount[0].count} películas/series`
+    );
+    console.log(`👥 Perfiles en BD: ${profilesCount[0].count} perfiles`);
+
     connection.release();
   } catch (error) {
     console.error("❌ Error conectando a la base de datos:", error.message);
-    console.error(
-      "🔧 Asegúrate de que MySQL esté ejecutándose y las credenciales sean correctas"
-    );
+    console.error("🔧 Diagnóstico:");
+
+    if (error.code === "ER_ACCESS_DENIED_ERROR") {
+      console.error(
+        "   - Error de autenticación: Usuario o contraseña incorrectos"
+      );
+      console.error("   - O el usuario no tiene permisos desde esta IP");
+      console.error(
+        "   - Ejecutar: mysql -u root -p < scripts/fix-db-permissions.sql"
+      );
+    } else if (error.code === "ECONNREFUSED") {
+      console.error("   - MySQL no está ejecutándose o no acepta conexiones");
+      console.error("   - Verificar: systemctl status mysql");
+    } else if (error.code === "ENOTFOUND") {
+      console.error("   - Host de BD no encontrado");
+      console.error(
+        `   - Verificar que ${process.env.DB_HOST || "localhost"} sea accesible`
+      );
+    }
+
+    console.error("🔧 Variables de entorno cargadas:");
+    console.error(`   DB_HOST: ${process.env.DB_HOST || "NO DEFINIDO"}`);
+    console.error(`   DB_USER: ${process.env.DB_USER || "NO DEFINIDO"}`);
+    console.error(`   DB_NAME: ${process.env.DB_NAME || "NO DEFINIDO"}`);
   }
 }
 
