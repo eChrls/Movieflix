@@ -10,8 +10,9 @@ require("dotenv").config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Trust proxy configuration for Nginx reverse proxy
-app.set("trust proxy", true);
+// Trust proxy configuration for Nginx reverse proxy (localhost only)
+// Trust proxy configuration for Nginx reverse proxy (specific to localhost)
+app.set("trust proxy", "loopback");
 
 // Security middleware
 app.use(
