@@ -285,12 +285,9 @@ const MovieManager = () => {
     setSearchLoading(true);
     try {
       const yearParam = year ? `&year=${year}` : "";
-      const response = await fetch(
-        `http://localhost:3001/api/search?title=${encodeURIComponent(
-          title
-        )}${yearParam}`
+      const data = await apiCall(
+        `/search?title=${encodeURIComponent(title)}${yearParam}`
       );
-      const data = await response.json();
 
       setSearchLoading(false);
 
