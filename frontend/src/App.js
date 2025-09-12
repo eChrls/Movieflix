@@ -51,6 +51,10 @@ const MovieManager = () => {
   const [accessCode, setAccessCode] = useState("");
   const [accessError, setAccessError] = useState("");
 
+  // 🌐 Sistema de URLs personalizadas por perfil
+  const [urlProfileName, setUrlProfileName] = useState(null);
+  const [directProfileAccess, setDirectProfileAccess] = useState(false);
+
   const [newContent, setNewContent] = useState({
     title: "",
     title_en: "",
@@ -174,17 +178,54 @@ const MovieManager = () => {
     initializeApp();
   }, []);
 
-  // 🔒 Verificar acceso al cargar
+  // 🔒 Verificar acceso y URL al cargar
   useEffect(() => {
     checkAccess();
+    const profileFromUrl = checkUrlProfile();
+    if (profileFromUrl) {
+      console.log(`🌐 URL Profile detectado: ${profileFromUrl}`);
+    }
   }, []);
 
   useEffect(() => {
     if (currentProfile) {
       loadContent();
       loadTopContent();
+      // Cargar también el contenido visto para tener el conteo actualizado
+      if (activeTab === "pending") {
+        loadWatchedContent();
+      }
     }
   }, [currentProfile, filters, activeTab]);
+
+  // 🌐 Selección automática de perfil desde URL
+  useEffect(() => {
+    if (
+      profiles.length > 0 &&
+      urlProfileName &&
+      !currentProfile &&
+      isAuthenticated
+    ) {
+      selectProfileFromUrl();
+    }
+  }, [profiles, urlProfileName, currentProfile, isAuthenticated]);
+
+  // Función para cargar contenido visto
+  const loadWatchedContent = async () => {
+    if (!currentProfile) return;
+
+    try {
+      const params = new URLSearchParams({
+        status: "watched",
+        ...filters,
+      });
+
+      const data = await apiCall(`/content/${currentProfile.id}?${params}`);
+      setWatchedContent(data);
+    } catch (error) {
+      console.error("Error loading watched content:", error);
+    }
+  };
 
   const loadProfiles = async () => {
     try {
@@ -456,6 +497,41 @@ const MovieManager = () => {
 
   const addContent = async (contentData) => {
     try {
+      // Verificar si ya existe contenido con el mismo título
+      const existingContent = content.find(
+        (item) =>
+          item.title.toLowerCase() === contentData.title.toLowerCase() ||
+          (item.title_en &&
+            contentData.title_en &&
+            item.title_en.toLowerCase() === contentData.title_en.toLowerCase())
+      );
+
+      const existingWatched = watchedContent.find(
+        (item) =>
+          item.title.toLowerCase() === contentData.title.toLowerCase() ||
+          (item.title_en &&
+            contentData.title_en &&
+            item.title_en.toLowerCase() === contentData.title_en.toLowerCase())
+      );
+
+      if (existingContent) {
+        setError(
+          `La ${contentData.type === "movie" ? "película" : "serie"} "${
+            contentData.title
+          }" ya está en tu lista de pendientes.`
+        );
+        return;
+      }
+
+      if (existingWatched) {
+        setError(
+          `La ${contentData.type === "movie" ? "película" : "serie"} "${
+            contentData.title
+          }" ya está en tu lista de vistas.`
+        );
+        return;
+      }
+
       const newContent = await apiCall("/content", {
         method: "POST",
         body: JSON.stringify({ ...contentData, profile_id: currentProfile.id }),
@@ -463,8 +539,10 @@ const MovieManager = () => {
 
       setContent([newContent, ...content]);
       loadTopContent();
+      setError(null); // Limpiar error si todo salió bien
     } catch (error) {
       console.error("Error adding content:", error);
+      setError("Error al añadir el contenido. Inténtalo de nuevo.");
     }
   };
 
@@ -490,6 +568,17 @@ const MovieManager = () => {
       loadContent();
     } catch (error) {
       console.error("Error marking as watched:", error);
+    }
+  };
+
+  const markAsPending = async (id) => {
+    try {
+      await apiCall(`/content/${id}/unwatch`, { method: "PATCH" });
+      setWatchedContent(watchedContent.filter((c) => c.id !== id));
+      loadTopContent();
+      loadContent();
+    } catch (error) {
+      console.error("Error marking as pending:", error);
     }
   };
 
@@ -539,6 +628,55 @@ const MovieManager = () => {
     } else {
       setAccessError("Código incorrecto");
       setAccessCode("");
+    }
+  };
+
+  // 🌐 Sistema de URLs personalizadas por perfil
+  const checkUrlProfile = () => {
+    const urlParams = new URL(window.location.href).searchParams;
+    const profileParam = urlParams.get("profile");
+
+    if (profileParam) {
+      setUrlProfileName(profileParam);
+      setDirectProfileAccess(true);
+      return profileParam;
+    }
+    return null;
+  };
+
+  const updateUrlWithProfile = (profileName) => {
+    if (!profileName) return;
+
+    const url = new URL(window.location.href);
+    url.searchParams.set("profile", encodeURIComponent(profileName));
+
+    // Actualizar URL sin recargar la página
+    window.history.replaceState({}, "", url.toString());
+  };
+
+  const clearUrlProfile = () => {
+    const url = new URL(window.location.href);
+    url.searchParams.delete("profile");
+    window.history.replaceState({}, "", url.toString());
+    setUrlProfileName(null);
+    setDirectProfileAccess(false);
+  };
+
+  const selectProfileFromUrl = async () => {
+    if (!urlProfileName || !profiles.length) return;
+
+    // Buscar perfil por nombre (case insensitive)
+    const targetProfile = profiles.find(
+      (profile) => profile.name.toLowerCase() === urlProfileName.toLowerCase()
+    );
+
+    if (targetProfile) {
+      setCurrentProfile(targetProfile);
+      setDirectProfileAccess(true);
+      console.log(`🌐 Perfil seleccionado desde URL: ${targetProfile.name}`);
+    } else {
+      console.warn(`⚠️ Perfil '${urlProfileName}' no encontrado en URL`);
+      clearUrlProfile();
     }
   };
 
@@ -679,16 +817,26 @@ const MovieManager = () => {
           </div>
         )}
 
-        {/* Action buttons overlay */}
-        <div className="absolute top-2 left-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        {/* Action buttons overlay - Mejorados para móvil */}
+        <div className="absolute top-2 left-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
           {!isWatched && (
             <button
               onClick={() => markAsWatched(item.id)}
-              className="bg-green-600 hover:bg-green-700 text-white p-2 rounded-lg transition-colors"
+              className="bg-green-600 hover:bg-green-700 text-white p-3 sm:p-2 rounded-lg transition-colors shadow-lg"
               title="Marcar como visto"
               aria-label="Marcar como visto"
             >
-              <Check size={14} />
+              <Check size={16} className="sm:w-4 sm:h-4" />
+            </button>
+          )}
+          {isWatched && (
+            <button
+              onClick={() => markAsPending(item.id)}
+              className="bg-orange-600 hover:bg-orange-700 text-white p-3 sm:p-2 rounded-lg transition-colors shadow-lg"
+              title="Volver a pendientes"
+              aria-label="Volver a pendientes"
+            >
+              <X size={16} className="sm:w-4 sm:h-4" />
             </button>
           )}
           <button
@@ -711,19 +859,19 @@ const MovieManager = () => {
               });
               setShowAddModal(true);
             }}
-            className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg transition-colors"
+            className="bg-blue-600 hover:bg-blue-700 text-white p-3 sm:p-2 rounded-lg transition-colors shadow-lg"
             title="Editar"
             aria-label="Editar"
           >
-            <Edit size={14} />
+            <Edit size={16} className="sm:w-4 sm:h-4" />
           </button>
           <button
             onClick={() => deleteContent(item.id)}
-            className="bg-netflix-darker hover:bg-netflix text-white p-2 rounded-lg transition-colors"
+            className="bg-netflix-darker hover:bg-netflix text-white p-3 sm:p-2 rounded-lg transition-colors shadow-lg"
             title="Eliminar"
             aria-label="Eliminar"
           >
-            <Trash2 size={14} />
+            <Trash2 size={16} className="sm:w-4 sm:h-4" />
           </button>
         </div>
       </div>
@@ -782,45 +930,19 @@ const MovieManager = () => {
           </div>
         </div>
 
-        {/* Platform */}
+        {/* Platform - Solo muestra la etiqueta, sin funcionalidad de click */}
         {item.platform_name && (
-          <div className="relative platform-menu-container mb-3">
-            <button
-              onClick={() =>
-                setShowPlatformMenu(
-                  showPlatformMenu === item.id ? null : item.id
-                )
-              }
-              className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs text-white font-medium hover:opacity-80 transition-opacity cursor-pointer"
+          <div className="mb-3">
+            <span
+              className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs text-white font-medium"
               style={{
                 backgroundColor:
                   item.platform_color || getPlatformColor(item.platform_name),
               }}
-              title="Click para cambiar plataforma"
+              title={item.platform_name}
             >
               {item.platform_icon} {item.platform_name}
-            </button>
-
-            {/* Platform dropdown menu */}
-            {showPlatformMenu === item.id && (
-              <div className="absolute top-full left-0 mt-1 bg-gray-800 border border-gray-700 rounded-md shadow-lg z-50 min-w-[150px]">
-                {platforms.map((platform) => (
-                  <button
-                    key={platform.id}
-                    onClick={() => changePlatform(item.id, platform.id)}
-                    className="w-full px-3 py-2 text-left text-sm text-white hover:bg-gray-700 flex items-center gap-2"
-                    style={{
-                      backgroundColor:
-                        item.platform_id === platform.id
-                          ? platform.color || getPlatformColor(platform.name)
-                          : "transparent",
-                    }}
-                  >
-                    {platform.icon} {platform.name}
-                  </button>
-                ))}
-              </div>
-            )}
+            </span>
           </div>
         )}
 
@@ -958,17 +1080,29 @@ const MovieManager = () => {
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex flex-col lg:flex-row justify-between items-center gap-4">
             <div className="flex items-center gap-4">
-              <h1 className="text-3xl font-bold text-netflix flex items-center gap-2 font-maven">
+              <button
+                onClick={() => {
+                  clearUrlProfile();
+                  window.location.reload();
+                }}
+                className="text-3xl font-bold text-netflix flex items-center gap-2 font-maven hover:text-red-400 transition-colors cursor-pointer"
+                title="Recargar página y volver al inicio"
+                aria-label="Recargar página y volver al inicio"
+              >
                 🎬 MovieFlix
-              </h1>
+              </button>
               <div className="flex items-center gap-2">
                 <select
                   value={currentProfile?.id || ""}
-                  onChange={(e) =>
-                    setCurrentProfile(
-                      profiles.find((p) => p.id === parseInt(e.target.value))
-                    )
-                  }
+                  onChange={(e) => {
+                    const selectedProfile = profiles.find(
+                      (p) => p.id === parseInt(e.target.value)
+                    );
+                    setCurrentProfile(selectedProfile);
+                    if (selectedProfile) {
+                      updateUrlWithProfile(selectedProfile.name);
+                    }
+                  }}
                   className="bg-gray-card border border-gray-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-netflix transition-colors font-maven"
                 >
                   {profiles.map((profile) => (

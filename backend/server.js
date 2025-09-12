@@ -157,6 +157,40 @@ app.post("/api/profiles", async (req, res) => {
   }
 });
 
+// Delete profile
+app.delete("/api/profiles/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Verificar que no sea el perfil "Home" (protegido)
+    const [profile] = await dbPool.execute(
+      "SELECT name FROM profiles WHERE id = ?",
+      [id]
+    );
+
+    if (profile.length === 0) {
+      return res.status(404).json({ error: "Perfil no encontrado" });
+    }
+
+    if (profile[0].name === "Home") {
+      return res
+        .status(400)
+        .json({ error: "No se puede eliminar el perfil Home" });
+    }
+
+    // Eliminar contenido asociado al perfil
+    await dbPool.execute("DELETE FROM content WHERE profile_id = ?", [id]);
+
+    // Eliminar el perfil
+    await dbPool.execute("DELETE FROM profiles WHERE id = ?", [id]);
+
+    res.json({ message: "Perfil eliminado correctamente" });
+  } catch (error) {
+    console.error("Error deleting profile:", error);
+    res.status(500).json({ error: "Error interno del servidor" });
+  }
+});
+
 // Get all platforms
 app.get("/api/platforms", async (req, res) => {
   try {
@@ -421,6 +455,23 @@ app.patch("/api/content/:id/watch", async (req, res) => {
     res.json({ message: "Contenido marcado como visto" });
   } catch (error) {
     console.error("Error marking content as watched:", error);
+    res.status(500).json({ error: "Error interno del servidor" });
+  }
+});
+
+// Mark content as pending (unwatch)
+app.patch("/api/content/:id/unwatch", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    await dbPool.execute(
+      'UPDATE content SET status = "pending", watched_at = NULL WHERE id = ?',
+      [id]
+    );
+
+    res.json({ message: "Contenido marcado como pendiente" });
+  } catch (error) {
+    console.error("Error marking content as pending:", error);
     res.status(500).json({ error: "Error interno del servidor" });
   }
 });
