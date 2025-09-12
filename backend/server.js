@@ -7,21 +7,28 @@ const compression = require("compression");
 const rateLimit = require("express-rate-limit");
 require("dotenv").config();
 
-// 🎭 Importaciones para modo demo
-const { isDemoMode } = require("./middleware/demoMode");
-const { applyDemoSecurity } = require("./middleware/demoSecurity");
-const demoRoutes = require("./routes/demoRoutes");
+// 🎭 Importaciones para modo demo (consolidadas)
+let isDemoMode = false;
+let demoPassword = "demo2024";
+let applyDemoSecurity = null;
+let demoRoutes = null;
 
-// 🎭 Importaciones para modo demo
-const { isDemoMode, demoPassword } = require("./middleware/demoMode");
-const { applyDemoSecurity } = require("./middleware/demoSecurity");
-const demoRoutes = require("./routes/demoRoutes");
+// Solo importar si los archivos existen (evitar crash en producción)
+try {
+  const demoMode = require("./middleware/demoMode");
+  isDemoMode = demoMode.isDemoMode;
+  demoPassword = demoMode.demoPassword;
+  applyDemoSecurity = require("./middleware/demoSecurity").applyDemoSecurity;
+  demoRoutes = require("./routes/demoRoutes");
+} catch (error) {
+  console.log("ℹ️  Modo demo no disponible (archivos no encontrados)");
+  isDemoMode = false;
+}
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Trust proxy configuration for Nginx reverse proxy (localhost only)
-// Trust proxy configuration for Nginx reverse proxy (specific to localhost)
+// Trust proxy configuration for Nginx reverse proxy
 app.set("trust proxy", "loopback");
 
 // Security middleware
@@ -121,7 +128,7 @@ async function testConnection() {
 }
 
 // 🎭 Configuración de modo demo
-if (isDemoMode) {
+if (isDemoMode && applyDemoSecurity && demoRoutes) {
   console.log("🎭 MOVIEFLIX DEMO MODE ACTIVADO");
   console.log("🎯 Usando datos simulados para portfolio");
   console.log("⚠️  Los datos NO se persistirán en base de datos");
