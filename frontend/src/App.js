@@ -11,6 +11,7 @@ import {
   AlertCircle,
   WifiOff,
   ChevronUp,
+  RotateCcw,
 } from "lucide-react";
 import DemoNotice from "./components/DemoNotice";
 
@@ -837,7 +838,7 @@ const MovieManager = () => {
               title="Volver a pendientes"
               aria-label="Volver a pendientes"
             >
-              <X size={16} className="sm:w-4 sm:h-4" />
+              <RotateCcw size={16} className="sm:w-4 sm:h-4" />
             </button>
           )}
           <button
